@@ -46,20 +46,25 @@ def rotationImg(img, rotDeg, resizeBool,color):#sens antihoraire
     rotatedImg = cv.warpAffine(img, transformation_matrix, (ncols, nrows), borderValue=color) #(B,G,R)
     return rotatedImg
 
-def scaleImg(img, s=1):
+def scaleImg(img, s):#s>1=zoom & s<1=dezoom
     nrows, ncols = img.shape[:2]
     cx, cy= ncols // 2, nrows // 2
     transformation_matrix = np.array([
         [s, 0, cx * (1 - s)],
         [0, s, cy * (1 - s)]
-    ], dtype=np.float32)
-    scaledImg = cv.warpAffine(img, transformation_matrix, (ncols, nrows), flags=cv.INTER_LINEAR)
+    ], 
+    dtype=np.float32)
+    #
+    scaledImg = cv.warpAffine(img, transformation_matrix, (ncols, nrows), flags=cv.INTER_AREA, borderValue=(255,255,255))
     return scaledImg
+
+
+
 
 img_orig = openShowImg("mire_315a.png")
 
-#modifImg = rotationImg(img_orig, 45, True, (255,255,255))
-modifImg= scaleImg(img_orig, 5)
+modifImg = rotationImg(img_orig, 45, True, (255,255,255))
+modifImg= scaleImg(modifImg, 0.5)
 
 cv.imshow("Modif", modifImg)
 key = cv.waitKey(0)
