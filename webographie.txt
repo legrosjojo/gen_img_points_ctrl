@@ -15,3 +15,9 @@ zoom img
 
 cam calib and 3D reconstruction
     https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html?highlight=rodrigues#void%20Rodrigues%28InputArray%20src,%20OutputArray%20dst,%20OutputArray%20jacobian%29
+
+inRange
+    https://stackoverflow.com/questions/48109650/how-to-detect-two-different-colors-using-cv2-inrange-in-python-opencv
+
+opencv
+    https://docs.opencv.org/4.x/index.html

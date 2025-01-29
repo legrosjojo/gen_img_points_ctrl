@@ -95,8 +95,16 @@ def maskColor(img, colorMask):  #BGR vert:[38, 179, 38] rouge:[0, 0, 255] noir:[
 
 
 img_orig = openShowImg("mire_315a.png")
-mask=[[38, 179, 38],[0, 0, 255],[0,0,0]]
-cv.imshow("maskColor1", maskColor(img_orig,mask[0]) )
+mask = [[38, 179, 38],[0, 0, 255],[0,0,0]]
+img = maskColor(img_orig,mask[0])
+cv.imshow("maskColor1", img )
+cv.imwrite("mask.png", img)
+#FindContours supports only CV_8UC1 images when mode != CV_RETR_FLOODFILL
+contours, hierarchy = cv.findContours(image=img,
+                                      mode=cv.CV_RETR_FLOODFILL, 
+                                      method=cv.CHAIN_APPROX_NONE,
+                                      offset=(0,0))#RETR_LIST,
+cv.imshow("maskColor1Contours", img )
 cv.imshow("maskColor2", maskColor(img_orig,mask[1]) )
 cv.imshow("maskColor3", maskColor(img_orig,mask[2]) )
 modifImg = rotationImg(img_orig, 20, False)
