@@ -64,10 +64,15 @@ def scaleImg(img, s):#s>1=zoom & s<1=dezoom
 img_orig = openShowImg("mire_315a.png")
 
 modifImg = rotationImg(img_orig, 45, True, (255,255,255))
-modifImg= scaleImg(modifImg, 0.5)
+modifImg = scaleImg(modifImg, 0.5)
 
 cv.imshow("Modif", modifImg)
 key = cv.waitKey(0)
 if key == ord('s'):
     saveImg(modifImg)
 
+#pour chaque fonction, j'envoie une image, je fabrique une matrice de transformation, je l'applique à mon image, je retourne mon image... pour tester transfo par transfo
+
+#at the end -> je déclare une matrice de transformation MatT
+#MatT= fctScale(...) @ fctRotate(...) @ fctRotate3D(...)
+#warpAffine(img_orig, MatT, img.scape[:2], flag=INTER_..., borderValue=...) 
