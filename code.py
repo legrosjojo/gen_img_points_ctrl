@@ -76,3 +76,6 @@ if key == ord('s'):
 #at the end -> je déclare une matrice de transformation MatT
 #MatT= fctScale(...) @ fctRotate(...) @ fctRotate3D(...)
 #warpAffine(img_orig, MatT, img.scape[:2], flag=INTER_..., borderValue=...) 
+
+#faire doxypypy
+#faire script test
