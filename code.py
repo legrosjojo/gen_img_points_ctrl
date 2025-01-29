@@ -28,9 +28,9 @@ def saveImg(img):
     cv.imwrite("img_modif.png", img)
     return
 
-def rotationImg(img, rotDeg, resizeBool):#sens antihoraire
+def rotationImg(img, rotDeg, resizeBool,color):#sens antihoraire
     #img size
-    nrows, ncols, _ = img.shape
+    nrows, ncols = img.shape[:2]
     if resizeBool :
         # Compute the translation and the new image size
         transformation_matrix = cv.getRotationMatrix2D((0,0), rotDeg, 1)
@@ -43,13 +43,26 @@ def rotationImg(img, rotDeg, resizeBool):#sens antihoraire
         transformation_matrix = cv.getRotationMatrix2D((ncols // 2, nrows//2), rotDeg, 1)
 
     #Compute the rotation part of the affine transformation
-    rotatedImg = cv.warpAffine(img, transformation_matrix, (ncols, nrows))
+    rotatedImg = cv.warpAffine(img, transformation_matrix, (ncols, nrows), borderValue=color) #(B,G,R)
     return rotatedImg
 
+def scaleImg(img, s=1):
+    nrows, ncols = img.shape[:2]
+    cx, cy= ncols // 2, nrows // 2
+    transformation_matrix = np.array([
+        [s, 0, cx * (1 - s)],
+        [0, s, cy * (1 - s)]
+    ], dtype=np.float32)
+    scaledImg = cv.warpAffine(img, transformation_matrix, (ncols, nrows), flags=cv.INTER_LINEAR)
+    return scaledImg
+
 img_orig = openShowImg("mire_315a.png")
-rotatedImg = rotationImg(img_orig, 45, True)
-cv.imshow("Modif", rotatedImg)
+
+#modifImg = rotationImg(img_orig, 45, True, (255,255,255))
+modifImg= scaleImg(img_orig, 5)
+
+cv.imshow("Modif", modifImg)
 key = cv.waitKey(0)
 if key == ord('s'):
-    saveImg(rotatedImg)
+    saveImg(modifImg)
 
