@@ -1,0 +1,8 @@
+doxypypy 
+    https://www.youtube.com/watch?v=Yu5XuahK3k8
+    https://github.com/Feneric/doxypypy
+
+transfo img
+    https://stackoverflow.com/questions/7019407/translating-and-rotating-an-image-in-3d-using-opencv
+    https://stackoverflow.com/questions/14942881/image-3d-rotation-opencv
+    https://stackoverflow.com/questions/7019407/translating-and-rotating-an-image-in-3d-using-opencv

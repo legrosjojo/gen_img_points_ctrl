@@ -1,9 +1,6 @@
 import cv2 as cv
 import sys
 
-#doxypypy https://www.youtube.com/watch?v=Yu5XuahK3k8
-#doxypypy https://github.com/Feneric/doxypypy
-
 def openShowImg(img_path):
     '''
     This function open and show an img
