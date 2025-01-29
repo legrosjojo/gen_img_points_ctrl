@@ -86,12 +86,22 @@ def rotation3D(img, rot3D, axe='x'):
     rot3DImg = cv.warpPerspective(img, transformation_matrix, (ncols, nrows), borderValue=(255, 255, 255)) # regarder borderMode
     return rot3DImg
 
-img_orig = openShowImg("mire_315a.png")
+def maskColor(img, colorMask):  #BGR vert:[38, 179, 38] rouge:[0, 0, 255] noir:[0,0,0]
+    mask= np.all(img==colorMask,axis=-1)
+    img_colorMask = np.full_like(img,255)
+    img_colorMask[mask] = colorMask
+    return  img_colorMask
 
+
+
+img_orig = openShowImg("mire_315a.png")
+mask=[[38, 179, 38],[0, 0, 255],[0,0,0]]
+cv.imshow("maskColor1", maskColor(img_orig,mask[0]) )
+cv.imshow("maskColor2", maskColor(img_orig,mask[1]) )
+cv.imshow("maskColor3", maskColor(img_orig,mask[2]) )
 modifImg = rotationImg(img_orig, 20, False)
-#modifImg = scaleImg(modifImg, 1)
-modifImg = rotation3D(modifImg, 15)
-cv.imshow("Modif", modifImg)
+cv.imshow("rotation3D", rotation3D(modifImg, 15))
+
 key = cv.waitKey(0)
 if key == ord('s'):
     saveImg(modifImg)
