@@ -1,18 +1,21 @@
 import cv2 as cv
 import sys
 
-'''
-This function open and show an img
-Args:
-    img_path: path to an image
+#doxypypy https://www.youtube.com/watch?v=Yu5XuahK3k8
+#doxypypy https://github.com/Feneric/doxypypy
 
-Returns:
-    An opened image
-
-Exemples:
-    >>>openShowImg("mire_315a.png")
-'''
 def openShowImg(img_path):
+    '''
+    This function open and show an img
+    Args:
+        img_path: path to an image
+
+    Returns:
+        An opened image
+
+    Exemples:
+        >>>openShowImg("mire_315a.png")
+    '''
     #img_path = "mire_315a.png"
     if img_path is None:
         sys.exit("err::Could not read the image.")
