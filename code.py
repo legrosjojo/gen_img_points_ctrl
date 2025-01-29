@@ -23,7 +23,11 @@ def openShowImg(img_path):
     key = cv.waitKey(0)
     return img_orig
 
-#if key == ord('s'):                        si k est tapé
-#   cv.imwrite("img_modif.png", img_modif)  alors enregistre img_modif en img_modif.png
+def saveImg(img):
+    cv.imwrite("img_modif.png", img)
+    return
 
-openShowImg("mire_315a.png")
+img = openShowImg("mire_315a.png")
+key = cv.waitKey(0)
+if key == ord('s'):
+    saveImg(img)

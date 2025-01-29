@@ -170,6 +170,10 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
+
+###.gitignore perso
+#ouput file
+img_modif.png
 #doc doxygen
 /html
 /latex
