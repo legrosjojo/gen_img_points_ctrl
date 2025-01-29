@@ -12,3 +12,6 @@ rotate img
 
 zoom img
     https://stackoverflow.com/questions/69050464/zoom-into-image-with-opencv
+
+cam calib and 3D reconstruction
+    https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html?highlight=rodrigues#void%20Rodrigues%28InputArray%20src,%20OutputArray%20dst,%20OutputArray%20jacobian%29
