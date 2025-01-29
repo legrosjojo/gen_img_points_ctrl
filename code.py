@@ -28,19 +28,19 @@ def saveImg(img):
     cv.imwrite("img_modif.png", img)
     return
 
-def rotationImg(img, rotDeg, resizeBool,color):#sens antihoraire
+def rotationImg(img, rotDeg, resizeBool,color=(255,255,255)):#sens antihoraire
     #img size
     nrows, ncols = img.shape[:2]
     if resizeBool :
         # Compute the translation and the new image size
-        transformation_matrix = cv.getRotationMatrix2D((0,0), rotDeg, 1)
-        original_corners = np.array([[0, 0], [ncols, 0], [ncols, nrows], [0, nrows]]).T
-        new_corners = np.int32(np.dot(transformation_matrix[:, :2], original_corners))
+        transformation_matrix = cv.getRotationMatrix2D((0,0), -rotDeg, 1)
+        orig_corners = np.array([[0, 0], [ncols, 0], [ncols, nrows], [0, nrows]]).T
+        new_corners = np.int32(np.dot(transformation_matrix[:, :2], orig_corners))
         x, y, ncols, nrows = cv.boundingRect(new_corners.T.reshape(1, 4, 2))
         transformation_matrix[:, 2] = [-x, -y]
     else :
         # Compute the translation and keep the original image size
-        transformation_matrix = cv.getRotationMatrix2D((ncols // 2, nrows//2), rotDeg, 1)
+        transformation_matrix = cv.getRotationMatrix2D((ncols // 2, nrows//2), -rotDeg, 1)
 
     #Compute the rotation part of the affine transformation
     rotatedImg = cv.warpAffine(img, transformation_matrix, (ncols, nrows), borderValue=color) #(B,G,R)
@@ -58,14 +58,39 @@ def scaleImg(img, s):#s>1=zoom & s<1=dezoom
     scaledImg = cv.warpAffine(img, transformation_matrix, (ncols, nrows), flags=cv.INTER_AREA, borderValue=(255,255,255))
     return scaledImg
 
+def rotation3D(img, rot3D, axe='x'):
+    nrows, ncols = img.shape[:2]
+    rot3D_rad = np.radians(rot3D) #pour sin&cos
 
+    src_pts = np.float32([[0, 0], 
+                          [ncols, 0], 
+                          [ncols, nrows], 
+                          [0, nrows]])
 
+    if axe == 'x':  #axe x
+        offset = int(nrows * 0.3 * np.sin(rot3D_rad)) 
+        dst_pts = np.float32([[0, offset],  # ht-gauche
+                              [ncols, - offset],  # ht-droit
+                              [ncols, nrows + offset],  # bas-droit
+                              [0, nrows - offset]  # bas-gauche
+        ])
+    else:#axe y
+        offset = int(ncols * 0.3 * np.sin(rot3D_rad))
+        dst_pts = np.float32([[offset, 0],  # ht-gauche
+                              [ncols - offset, 0],  # ht-droit
+                              [ncols + offset, nrows],  # bas-droit
+                              [-offset, nrows]  # bas-gauche
+        ])
+  
+    transformation_matrix = cv.getPerspectiveTransform(src_pts, dst_pts)
+    rot3DImg = cv.warpPerspective(img, transformation_matrix, (ncols, nrows), borderValue=(255, 255, 255)) # regarder borderMode
+    return rot3DImg
 
 img_orig = openShowImg("mire_315a.png")
 
-modifImg = rotationImg(img_orig, 45, True, (255,255,255))
-modifImg = scaleImg(modifImg, 0.5)
-
+modifImg = rotationImg(img_orig, 20, False)
+#modifImg = scaleImg(modifImg, 1)
+modifImg = rotation3D(modifImg, 15)
 cv.imshow("Modif", modifImg)
 key = cv.waitKey(0)
 if key == ord('s'):
