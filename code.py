@@ -98,7 +98,7 @@ img_orig = openShowImg("mire_315a.png")
 mask = [[38, 179, 38],[0, 0, 255],[0,0,0]]
 img = maskColor(img_orig,mask[0])
 cv.imshow("maskColor1", img )
-cv.imwrite("mask.png", img)
+cv.imwrite("img/mask.png", img)
 #FindContours supports only CV_8UC1 images when mode != CV_RETR_FLOODFILL
 contours, hierarchy = cv.findContours(image=img,
                                       mode=cv.CV_RETR_FLOODFILL, 
