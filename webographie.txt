@@ -6,3 +6,9 @@ transfo img
     https://stackoverflow.com/questions/7019407/translating-and-rotating-an-image-in-3d-using-opencv
     https://stackoverflow.com/questions/14942881/image-3d-rotation-opencv
     https://stackoverflow.com/questions/7019407/translating-and-rotating-an-image-in-3d-using-opencv
+
+rotate img
+    https://mikamustonen.com/2019-06-22-how-to-rotate-an-image-with-opencv.html
+
+zoom img
+    https://stackoverflow.com/questions/69050464/zoom-into-image-with-opencv
