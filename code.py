@@ -92,13 +92,22 @@ def maskColor(img, colorMask):  #BGR vert:[38, 179, 38] rouge:[0, 0, 255] noir:[
     img_colorMask[mask] = colorMask
     return  img_colorMask
 
-
+##################################################################################################
+#                                            MAIN                                                #
+##################################################################################################
 
 img_orig = openShowImg("mire_315a.png")
+
+
+modifImg = rotationImg(img_orig, 20, False)
+modifImg = rotation3D(modifImg, 15)
+cv.imshow("rotation3D", modifImg)
+
 mask = [[38, 179, 38],[0, 0, 255],[0,0,0]]
-img = maskColor(img_orig,mask[1])
+img = maskColor(modifImg,mask[0])
 cv.imshow("maskColor1", img )
-cv.imwrite("img/mask.png", img)
+#cv.imwrite("img/mask.png", img)
+
 
 #erreur FindContours supports only CV_8UC1 images when mode != CV_RETR_FLOODFILL
 img = cv.cvtColor(img, code=cv.COLOR_BGR2GRAY) #convertion image vers format CV_8UC1, içi en niveau de gris 
@@ -106,22 +115,27 @@ ret, thresh = cv.threshold(img, 127, 255, 0)  #stack overflow, le threshold de f
 #recup les contours (tous les points)
 contours, hierarchy = cv.findContours(image=thresh,
                                       mode=cv.RETR_TREE, 
-                                      method=cv.CHAIN_APPROX_SIMPLE,
+                                      method=cv.CHAIN_APPROX_NONE,
                                       offset=(0,0))#RETR_LIST,
 #dessine et donne le milieu de chaque contours 
 for c in contours:
+       # if cv.contourArea(c) >= 90000:
+        #    print("degage")
         if cv.contourArea(c) <= 50 :
             continue    
         x,y,w,h = cv.boundingRect(c)
-        cv.rectangle(img_orig, (x, y), (x + w, y + h), (255, 0,255), 2)
-        center = (x,y)
-        print (center)
+        if(x,y)!=(0,0):
+            cv.rectangle(modifImg, (x, y), (x + w, y + h), (255, 0,255), 2)
+            center = (x,y,"motif")
+            print (center)
+
+#faire ça pour les trois motifs,stocker tout les 'center' dans un tab, trier par coordonnées -> disposition de ma grille modif
+#faire pareil avec toutes les grilles non modif jusqu'à trouver correspondance avec ma grille modif -> finis
+#paramètres caméra dans tout ça ?
 
 #cv.imshow("maskColor2", maskColor(img_orig,mask[1]) )
 #cv.imshow("maskColor3", maskColor(img_orig,mask[2]) )
-modifImg = rotationImg(img_orig, 20, False)
-modifImg = rotation3D(modifImg, 15)
-cv.imshow("rotation3D", modifImg)
+cv.imshow("contours", modifImg)
 
 key = cv.waitKey(0)
 if key == ord('s'):
