@@ -30,7 +30,7 @@ def openShowImg(img_path):
     img_orig = cv.imread(cv.samples.findFile(img_path))
     
     cv.imshow("Display window", img_orig)
-    key = cv.waitKey(0)
+    #key = cv.waitKey(0)
     return img_orig
 
 def saveImg(img):
@@ -120,8 +120,8 @@ def contientDeja(listCenter, x, y, inter=inter_contours):
 img_orig = openShowImg("mire_315a.png")
 
 
-modifImg = rotationImg(img_orig, 30, False)
-modifImg = rotation3D(modifImg, -5)
+modifImg = rotationImg(img_orig, 5, False)
+modifImg = rotation3D(modifImg, 35)
 cv.imshow("rotation3D", modifImg)
 
 

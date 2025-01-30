@@ -27,3 +27,6 @@ contours
 
 numpy
     https://numpy.org/doc/
+
+images comparaison
+    https://answers.opencv.org/question/8519/image-comparison/
