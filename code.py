@@ -1,4 +1,4 @@
-import cv2 as cv
+import cv2 as cv # type: ignore
 import numpy as np
 import sys
 
@@ -8,7 +8,7 @@ import sys
 inter_contours = 10
 limit_area = 25
 ##################################################################################################
-#                                          FONCTION                                              #
+#                                          FONCTION               fg                               #
 ##################################################################################################
 
 def openShowImg(img_path):
