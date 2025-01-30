@@ -24,3 +24,6 @@ opencv
 
 contours
     https://stackoverflow.com/questions/39441935/how-to-get-x-y-position-of-contours-in-python-opencv
+
+numpy
+    https://numpy.org/doc/
