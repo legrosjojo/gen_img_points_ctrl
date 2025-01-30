@@ -96,23 +96,38 @@ def maskColor(img, colorMask):  #BGR vert:[38, 179, 38] rouge:[0, 0, 255] noir:[
 
 img_orig = openShowImg("mire_315a.png")
 mask = [[38, 179, 38],[0, 0, 255],[0,0,0]]
-img = maskColor(img_orig,mask[0])
+img = maskColor(img_orig,mask[1])
 cv.imshow("maskColor1", img )
 cv.imwrite("img/mask.png", img)
 #FindContours supports only CV_8UC1 images when mode != CV_RETR_FLOODFILL
-contours, hierarchy = cv.findContours(image=img,
-                                      mode=cv.CV_RETR_FLOODFILL, 
-                                      method=cv.CHAIN_APPROX_NONE,
+img = cv.cvtColor(img, code=cv.COLOR_BGR2GRAY)#mask[0],
+ret, thresh = cv.threshold(img, 127, 255, 0) 
+contours, hierarchy = cv.findContours(image=thresh,
+                                      mode=cv.RETR_TREE, 
+                                      method=cv.CHAIN_APPROX_SIMPLE,
                                       offset=(0,0))#RETR_LIST,
-cv.imshow("maskColor1Contours", img )
-cv.imshow("maskColor2", maskColor(img_orig,mask[1]) )
-cv.imshow("maskColor3", maskColor(img_orig,mask[2]) )
+for c in contours:
+        if cv.contourArea(c) <= 50 :
+            continue    
+        x,y,w,h = cv.boundingRect(c)
+        cv.rectangle(img_orig, (x, y), (x + w, y + h), (255, 0,255), 2)
+        center = (x,y)
+        print (center)
+
+while True: 
+    cv.imshow('test',img_orig)
+    if cv.waitKey(0):
+        break
+
+#cv.imshow("maskColor2", maskColor(img_orig,mask[1]) )
+#cv.imshow("maskColor3", maskColor(img_orig,mask[2]) )
 modifImg = rotationImg(img_orig, 20, False)
 cv.imshow("rotation3D", rotation3D(modifImg, 15))
 
 key = cv.waitKey(0)
 if key == ord('s'):
     saveImg(modifImg)
+cv.destroyAllWindows()
 
 #pour chaque fonction, j'envoie une image, je fabrique une matrice de transformation, je l'applique à mon image, je retourne mon image... pour tester transfo par transfo
 

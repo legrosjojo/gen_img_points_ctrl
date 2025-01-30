@@ -21,3 +21,6 @@ inRange
 
 opencv
     https://docs.opencv.org/4.x/index.html
+
+contours
+    https://stackoverflow.com/questions/39441935/how-to-get-x-y-position-of-contours-in-python-opencv
