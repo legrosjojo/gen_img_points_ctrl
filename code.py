@@ -2,6 +2,15 @@ import cv2 as cv
 import numpy as np
 import sys
 
+##################################################################################################
+#                                           DEFINE                                               #
+##################################################################################################
+inter_contours = 10
+limit_area = 25
+##################################################################################################
+#                                          FONCTION                                              #
+##################################################################################################
+
 def openShowImg(img_path):
     '''
     This function open and show an img
@@ -94,6 +103,16 @@ def maskColor(img, colorMask):  #BGR vert:[38, 179, 38] rouge:[0, 0, 255] noir:[
     img_colorMask[mask > 0] = colorMask[0] #if [201, 201, 255] is None else [0, 0, 255]
     return  img_colorMask
 
+def contientDeja(listCenter, x, y, inter=inter_contours):
+    if len(listCenter) > 0 :
+        for i in range (0,len(listCenter)):
+            if (listCenter[i][0] >= x-inter)&(listCenter[i][0] <= x+inter) :
+                if (listCenter[i][1] >= y-inter)&(listCenter[i][1] <= y+inter):
+                    return True
+    return False    
+        
+
+
 ##################################################################################################
 #                                            MAIN                                                #
 ##################################################################################################
@@ -105,41 +124,44 @@ modifImg = rotationImg(img_orig, 30, False)
 modifImg = rotation3D(modifImg, -5)
 cv.imshow("rotation3D", modifImg)
 
+
 mask = [ ([38, 179, 38], [38, 179, 38]), ([0, 0, 255], [201, 201, 255]), ([0,0,0], [170,170,170])]
 centerTab=[]
 drawImg = modifImg
-img = maskColor(modifImg,mask[2])
-cv.imshow("test", img)
-'''
+#img = maskColor(modifImg,mask[0])
+#cv.imshow("test", img)
+
 #erreur FindContours supports only CV_8UC1 images when mode != CV_RETR_FLOODFILL
 for i in range (0,3):
     img = maskColor(modifImg,mask[i])
     cv.imshow(str(i), img)
     cv.imwrite("img/"+str(i)+".png", img)
+    #hsv -> gray -> threshold fonctionne que gray -> threshold non
     img = cv.cvtColor(img, cv.COLOR_BGR2HSV)
-    #cv.imshow("hsv_"+str(i), img)
     img = cv.cvtColor(img, code=cv.COLOR_BGR2GRAY) #convertion image vers format CV_8UC1, içi en niveau de gris
-    #cv.imshow("gray_"+str(i), img)
     #regarder pour adaptiveThreshold car il faudrait un filtrage adaptatif pour motif rouge et noir
+    #[100, 76, 30] -> vert[38, 179, 38] rouge[0, 0, 255] noir en niveau de gris
     ret, thresh = cv.threshold(img, [100, 76, 30][i], 255, 0)  #stack overflow, le threshold de filter les valeurs extremes
     
     #recup les contours (tous les points)
     contours, hierarchy = cv.findContours(image=thresh,
                                         mode=cv.RETR_TREE, 
-                                        method=cv.CHAIN_APPROX_NONE,
+                                        method=cv.CHAIN_APPROX_SIMPLE,
                                         offset=(0,0))#RETR_LIST,
+    #print(len(contours))
     #dessine et donne le milieu de chaque contours 
     for c in contours:
         # if cv.contourArea(c) >= 90000:
             #    print("degage")
-            if cv.contourArea(c) <= 20 :
+            if cv.contourArea(c) <= limit_area :
                 continue    
             x,y,w,h = cv.boundingRect(c)
-            if(x,y)!=(0,0):
-                cv.rectangle(drawImg, (x, y), (x + w, y + h), (155+(i*50), 0, 0), 2)
+            if ( (x,y)!=(0,0) )&(not contientDeja(centerTab, x, y)):
+                                                             #(155+(i*50)) -> du etre changer sinon contour compter comme motif pour mask[2] -> ? n'est pas sensé appliqué le mask sur une image comportnat des contours
+                cv.rectangle(drawImg, (x, y), (x + w, y + h), (171+(i*42), 0, 0), 2)
                 centerTab.append((x,y,i)) #motif in {"rond", "trait", "cercle"}
                 print ((x,y,i))
-
+print(len(centerTab))
 #faire ça pour les trois motifs,stocker tout les 'center' dans un tab, trier par coordonnées -> disposition de ma grille modif
 #faire pareil avec toutes les grilles non modif jusqu'à trouver correspondance avec ma grille modif -> finis
 #paramètres caméra dans tout ça ?
@@ -147,7 +169,7 @@ for i in range (0,3):
 #cv.imshow("maskColor3", maskColor(img_orig,mask[2]) )
 cv.imshow("contours", drawImg)
 cv.imwrite("img/contours.png", drawImg)
-'''
+
 key = cv.waitKey(0)
 if key == ord('s'):
     saveImg(modifImg)
