@@ -183,3 +183,18 @@ cv.destroyAllWindows()
 
 #faire doxypypy
 #faire script test
+
+"""
+[a,b,c]
+[d,e,f]
+[g,h,i]
+
+0° : ebfhdacig
+45° : eacigdbfh
+90° : efhdbciga
+135° : ebdfgceai
+180° : ehdbfigac
+225° : efcdgieba
+270° : edbfhgaci
+315° : egdfcaebi
+"""
