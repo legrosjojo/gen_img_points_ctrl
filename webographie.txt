@@ -5,7 +5,9 @@ doxypypy
 transfo img
     https://stackoverflow.com/questions/7019407/translating-and-rotating-an-image-in-3d-using-opencv
     https://stackoverflow.com/questions/14942881/image-3d-rotation-opencv
-    https://stackoverflow.com/questions/7019407/translating-and-rotating-an-image-in-3d-using-opencv
+    http://www.pierreaudibert.fr/tra/Rotation3D.pdf
+    https://www.bing.com/images/search?view=detailV2&ccid=TiOF%2bsMF&id=AC6EFA64E11375950041DBC3E60AC658C0BD188D&thid=OIP.TiOF-sMF-JPTh25zPkMhnQHaEK&mediaurl=https%3a%2f%2fi.ytimg.com%2fvi%2fbcNjfAdYiZ4%2fmaxresdefault.jpg&cdnurl=https%3a%2f%2fth.bing.com%2fth%2fid%2fR.4e2385fac305f893d3876e733e43219d%3frik%3djRi9wFjGCubD2w%26pid%3dImgRaw%26r%3d0&exph=720&expw=1280&q=matrice+de+rotation+3d&simid=608028561094437004&FORM=IRPRST&ck=116CD255274B6328C7857E03822094A7&selectedIndex=0&itb=0&idpp=overlayview&ajaxhist=0&ajaxserp=0
+    
 
 rotate img
     https://mikamustonen.com/2019-06-22-how-to-rotate-an-image-with-opencv.html
