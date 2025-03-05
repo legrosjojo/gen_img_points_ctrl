@@ -6,7 +6,12 @@ transfo img
     https://stackoverflow.com/questions/7019407/translating-and-rotating-an-image-in-3d-using-opencv
     https://stackoverflow.com/questions/14942881/image-3d-rotation-opencv
     http://www.pierreaudibert.fr/tra/Rotation3D.pdf
-    https://www.bing.com/images/search?view=detailV2&ccid=TiOF%2bsMF&id=AC6EFA64E11375950041DBC3E60AC658C0BD188D&thid=OIP.TiOF-sMF-JPTh25zPkMhnQHaEK&mediaurl=https%3a%2f%2fi.ytimg.com%2fvi%2fbcNjfAdYiZ4%2fmaxresdefault.jpg&cdnurl=https%3a%2f%2fth.bing.com%2fth%2fid%2fR.4e2385fac305f893d3876e733e43219d%3frik%3djRi9wFjGCubD2w%26pid%3dImgRaw%26r%3d0&exph=720&expw=1280&q=matrice+de+rotation+3d&simid=608028561094437004&FORM=IRPRST&ck=116CD255274B6328C7857E03822094A7&selectedIndex=0&itb=0&idpp=overlayview&ajaxhist=0&ajaxserp=0
+    https://stackoverflow.com/questions/17087446/how-to-calculate-perspective-transform-for-opencv-from-rotation-angles
+    https://www.bing.com/images/search?view=detailV2&ccid=FoaZZ6%2bi&id=4BC33E41205BFBC456BBE75E079BA18D752206F2&thid=OIP.FoaZZ6-i3Ind7s0xo2sRjgHaFj&mediaurl=https%3a%2f%2fimage3.slideserve.com%2f6006501%2f3d-transformation-matrices-l.jpg&cdnurl=https%3a%2f%2fth.bing.com%2fth%2fid%2fR.16869967afa2dc89ddeecd31a36b118e%3frik%3d8gYidY2hmwde5w%26pid%3dImgRaw%26r%3d0&exph=768&expw=1024&q=matrice+de+transformation++3d&simid=608025765044119729&FORM=IRPRST&ck=6B434E40843947D4231B8218E488E294&selectedIndex=0&itb=0&ajaxhist=0&ajaxserp=0
+
+    https://www.bing.com/images/search?view=detailV2&ccid=ESmPXrDi&id=F2821321A8B4E7FFF25A9BE0552B595097218A6C&thid=OIP.ESmPXrDiyJZuxJ7S81WFlAHaB6&mediaurl=https%3A%2F%2Fi.stack.imgur.com%2FIzACk.png&exph=267&expw=1035&q=matrice+de+transformation++3d&simid=608030833174786936&form=IRPRST&ck=208D7E309930E22285B1A81A705E0CD0&selectedindex=12&itb=1&ajaxhist=0&ajaxserp=0&cdnurl=https%3A%2F%2Fth.bing.com%2Fth%2Fid%2FR.11298f5eb0e2c8966ec49ed2f3558594%3Frik%3DbIohl1BZK1Xgmw%26pid%3DImgRaw%26r%3D0&pivotparams=insightsToken%3Dccid_jDZ%252FPAS9*cp_D11CE8697D3B5BECC5B70AD16EE39471*mid_C8ABBBFFF5C92E771DC774A188B77385BACC6F48*simid_607987930738066391*thid_OIP.jDZ!_PAS9qjJ!_Ts9QjjZIiAHaB!_&vt=0&sim=11&iss=VSI&ajaxhist=0&ajaxserp=0
+
+    https://github.com/saleh1312/python/blob/master/opencv%20-%203d%20rotation
     
 
 rotate img

@@ -92,6 +92,7 @@ def rotation3D(img, rot3D, axe='x'):
         ])
   
     transformation_matrix = cv.getPerspectiveTransform(src_pts, dst_pts)
+    print(transformation_matrix)
     rot3DImg = cv.warpPerspective(img, transformation_matrix, (ncols, nrows), borderValue=(255, 255, 255)) # regarder borderMode
     return rot3DImg
 
@@ -120,7 +121,8 @@ def contientDeja(listCenter, x, y, inter=inter_contours):
 img_orig = openShowImg("mire_315a.png")
 
 
-modifImg = rotationImg(img_orig, 45, False)
+#modifImg = rotationImg(img_orig, 45, False)
+modifImg = img_orig
 modifImg = rotation3D(modifImg, 15)
 cv.imshow("rotation3D", modifImg)
 
