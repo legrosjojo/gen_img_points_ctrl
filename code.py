@@ -121,9 +121,9 @@ def contientDeja(listCenter, x, y, inter=inter_contours):
 img_orig = openShowImg("mire_315a.png")
 
 
-#modifImg = rotationImg(img_orig, 45, False)
-modifImg = img_orig
-modifImg = rotation3D(modifImg, 15)
+modifImg = rotationImg(img_orig, 45, False)
+#modifImg = img_orig
+#modifImg = rotation3D(modifImg, 15)
 cv.imshow("rotation3D", modifImg)
 
 
