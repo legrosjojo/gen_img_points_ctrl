@@ -6,10 +6,6 @@ import sys
 ##################################################################################################
 #                                           DEFINE                                               #
 ##################################################################################################
-inter_contours = 10
-limit_area = 25
-mask = [ ([38, 179, 38], [38, 179, 38]), ([0, 0, 255], [201, 201, 255]), ([0,0,0], [170,170,170])]
-centerTab=[]
 
 path_mire_orig = "mire_315a.png" #chemin de la mire orignel
 if path_mire_orig is None:
@@ -18,35 +14,42 @@ mire_orig = cv.imread(cv.samples.findFile(path_mire_orig)) #mire originel
 cv.imshow("Mire", mire_orig)
 
 nrows, ncols = mire_orig.shape[:2]
-virtual_focal= 75 # |warning :: valeur par defaut est 75 en mode dev|
+
+virtual_focal = 75 # |warning :: valeur par defaut est 75 en mode dev|
 virtual_focal_dist = ncols / (2 * np.tan(np.radians(virtual_focal / 2))) # distance focal virtuelle
 
 #translation
-t_x=0
-t_y=0
-t_z=0
+t_x = 0
+t_y = 0
+t_z = 0
 #rotation
-r_x=0
-r_y=15
-r_z=0
+r_x = 0
+r_y = 15
+r_z =0
 #si r_x et r_y déterminer l'odre 'xy' ou 'yx'
-bool_rxy=None #PAS TOUCHE PTIT CON
-sens_rxy=None
+bool_rxy = None #PAS TOUCHE PTIT CON
+sens_rxy = None
 #scale |warning :: valeur par defaut est 1|
-sc_x=1
-sc_y=1
-sc_z=1
+sc_x = 1
+sc_y = 1
+sc_z = 1
 
 #important pour la translation z obligatoire en cas de rotation X et/ou Y 
 if (not r_x==0)and(not r_y==0):
-    bool_rxy=True
+    bool_rxy = True
     if sens_rxy not in ['xy','yx']:
         sys.exit("err::sens_rxy")
 else:
-    bool_rxy=False 
+    bool_rxy = False 
 
 
+inter_contours = 10
+limit_area = 25
 
+mask = [([38, 179, 38], [38, 179, 38]), ([0, 0, 255], [201, 201, 255]), ([0,0,0], [170,170,170])]
+threshold = [100, 76, 30]
+contour = []
+center_tab = []
 
 
 ##################################################################################################
@@ -135,7 +138,7 @@ def rotationXYZ(axis, degXYZ=None):
             return modified_H_part
     return np.eye(4)
 
-def rotationXYZ_bis(rx=1, ry=1, rz=0):
+def rotationXYZBis(rx=1, ry=1, rz=0):
     radX, radY, radZ = np.radians(rx), np.radians(ry), np.radians(rz)
     cosX, cosY, cosZ = np.cos(radX), np.cos(radY), np.cos(radZ)
     sinX, sinY, sinZ = np.sin(radX), np.sin(radY), np.sin(radZ)
@@ -161,8 +164,6 @@ def rotationXYZ_bis(rx=1, ry=1, rz=0):
 #    [ 0,  0,  0,  1]]      
 #
 
-angle = 15
-
 def translationXYZ(tx=0, ty=0, tz=0):
     return np.array([
         [1, 0, 0, tx],
@@ -177,11 +178,10 @@ def tz_rxy():
 #        print('yep')
 #        return np.eye(4)
 #    else:
-    print(np.sin(np.radians(0))*(ncols/2)*2)
     return np.array([
         [1, 0, 0, 0],
         [0, 1, 0, 0],
-        [0, 0, 1, virtual_focal_dist], 
+        [0, 0, 1, virtual_focal_dist], #on peut mettre n'importe quel valeur
         [0, 0, 0, 1]
     ], dtype=np.float32) #np.array avec dtype=np.float32 pour être compatible avec warpPerspective
 
@@ -219,21 +219,65 @@ def scaleXYZ(scx, scy, scz):
 #                                      FONCTION CONTOURS                                         #
 ##################################################################################################
 
+def maskMotif(img, inter_motif):  #BGR vert:[38, 179, 38] rouge:[0, 0, 255] noir:[0,0,0]
+    mask = cv.inRange(img, np.array(inter_motif[0], dtype=np.uint8), np.array(inter_motif[1], dtype=np.uint8))
+    filtered_img = np.full_like(img,255, dtype=np.uint8)
+    filtered_img[mask > 0] = inter_motif[0] #if [201, 201, 255] is None else [0, 0, 255]
+    return filtered_img
 
+def grayAndThreshold(img, threshold_value):
+    #hsv -> gray -> threshold fonctionne que gray -> threshold non
+    hsv_img = cv.cvtColor(img, cv.COLOR_BGR2HSV)
+    gray_img = cv.cvtColor(hsv_img, code=cv.COLOR_BGR2GRAY) #convertion image vers format CV_8UC1, içi en niveau de gris
+    #regarder pour adaptiveThreshold car il faudrait un filtrage adaptatif pour motif rouge et noir
+    #[100, 76, 30] -> vert[38, 179, 38] rouge[0, 0, 255] noir en niveau de gris
+    _, thresh = cv.threshold(gray_img, threshold_value, 255, 0)  #stack overflow, le threshold de filter les valeurs extremes
+    return thresh
 
+def contientDeja(list_center, x, y, inter=inter_contours):
+    if len(list_center) > 0 :
+        for i in range (0,len(list_center)):
+            if (list_center[i][0] >= x-inter)&(list_center[i][0] <= x+inter) :
+                if (list_center[i][1] >= y-inter)&(list_center[i][1] <= y+inter):
+                    return True
+    return False  
 
+def findContours(img, motif=None):
+    if not motif:
+        sys.exit("err::findContours motif is None")
+
+    contours, _ = cv.findContours(image=thresh,
+                                  mode=cv.RETR_TREE, 
+                                  method=cv.CHAIN_APPROX_SIMPLE,
+                                  offset=(0,0))#RETR_LIST,
+    for c in contours:
+        # if cv.contourArea(c) >= 90000:
+            #    print("degage")
+            if cv.contourArea(c) <= limit_area :
+                continue    
+            x,y,w,h = cv.boundingRect(c)
+            if ( (x,y)!=(0,0) )&(not contientDeja(center_tab, x, y)):
+                                                             #(155+(i*50)) -> du etre changer sinon contour compter comme motif pour mask[2] -> ? n'est pas sensé appliqué le mask sur une image comportnat des contours
+                cv.rectangle(img, (x, y), (x + w, y + h), (171+(motif*42), 0, 0), 2)
+                center_tab.append((x,y,motif)) #motif in {"rond", "trait", "cercle"}
+                #print ((x,y,motif))
+    
 
 
 ##################################################################################################
 #                                            MAIN                                                #
 ##################################################################################################
 
-#H =  translationXY(ncols//2, nrows//2) @ rotationXYZ('x', 45) @ translationXY(-ncols//2, -nrows//2)
-transfo= tz_rxy() @ translationXYZ(t_x,t_y,t_z) @  rotationXYZ_bis(r_x,r_y,r_z)
-print(transfo)
+transfo = tz_rxy() @ translationXYZ(t_x,t_y,t_z) @  rotationXYZBis(r_x,r_y,r_z)
 H =  _3Dto2D() @ transfo @ _2Dto3D() 
-print(H)
 modImg = cv.warpPerspective(mire_orig, H, (ncols, nrows), None, borderValue=(255,255,255))
 cv.imshow("Modif", modImg)
+
+maskmodImg = maskMotif(modImg, mask[0])
+cv.imshow("Mask1", maskmodImg)
+
+grayAndThreshold
+threshmodImg = grayAndThreshold(maskmodImg, threshold[0])
+cv.imshow("Thresh1", threshmodImg)
 
 cv.waitKey(0)
