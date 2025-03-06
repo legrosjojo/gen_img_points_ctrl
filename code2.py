@@ -1,6 +1,7 @@
 import cv2 as cv # type: ignore
 import numpy as np
 import sys
+import os
 
 
 ##################################################################################################
@@ -11,9 +12,9 @@ path_mire_orig = "mire_315a.png" #chemin de la mire orignel
 if path_mire_orig is None:
         sys.exit("err::Could not read the image.")    
 mire_orig = cv.imread(cv.samples.findFile(path_mire_orig)) #mire originel
-cv.imshow("Mire", mire_orig)
-
 nrows, ncols = mire_orig.shape[:2]
+
+modified_mire = mire_orig
 
 virtual_focal = 75 # |warning :: valeur par defaut est 75 en mode dev|
 virtual_focal_dist = ncols / (2 * np.tan(np.radians(virtual_focal / 2))) # distance focal virtuelle
@@ -24,8 +25,8 @@ t_y = 0
 t_z = 0
 #rotation
 r_x = 0
-r_y = 15
-r_z =0
+r_y = 0
+r_z = 45
 #si r_x et r_y déterminer l'odre 'xy' ou 'yx'
 bool_rxy = None #PAS TOUCHE PTIT CON
 sens_rxy = None
@@ -48,9 +49,15 @@ limit_area = 25
 
 mask = [([38, 179, 38], [38, 179, 38]), ([0, 0, 255], [201, 201, 255]), ([0,0,0], [170,170,170])]
 threshold = [100, 76, 30]
-contour = []
 center_tab = []
 
+#img, transformation, mask, hsv, grey, threshold, contours 
+show_data = [True, True, False, False, False, False, True]
+#parametres + "
+save_data = [True, True, True, False, False, False, False, True]
+if any(save_data):
+    if not os.path.exists("data"):
+        os.makedirs("data")
 
 ##################################################################################################
 #                                   FONCTION TRANSFORMATION                                      #
@@ -225,12 +232,18 @@ def maskMotif(img, inter_motif):  #BGR vert:[38, 179, 38] rouge:[0, 0, 255] noir
     filtered_img[mask > 0] = inter_motif[0] #if [201, 201, 255] is None else [0, 0, 255]
     return filtered_img
 
-def grayAndThreshold(img, threshold_value):
+def grayAndThreshold(img, threshold_value, i=None):
     #hsv -> gray -> threshold fonctionne que gray -> threshold non
     hsv_img = cv.cvtColor(img, cv.COLOR_BGR2HSV)
-    gray_img = cv.cvtColor(hsv_img, code=cv.COLOR_BGR2GRAY) #convertion image vers format CV_8UC1, içi en niveau de gris
-    #regarder pour adaptiveThreshold car il faudrait un filtrage adaptatif pour motif rouge et noir
-    #[100, 76, 30] -> vert[38, 179, 38] rouge[0, 0, 255] noir en niveau de gris
+    if show_data[3]:
+            cv.imshow("hsv"+str(i), hsv_img)
+    if save_data[4]:
+        cv.imwrite("data/hsv"+str(i)+".png", hsv_img)
+    gray_img = cv.cvtColor(hsv_img, code=cv.COLOR_BGR2GRAY) 
+    if show_data[4]:
+            cv.imshow("gray"+str(i), gray_img)
+    if save_data[5]:
+        cv.imwrite("data/gray"+str(i)+".png", gray_img)
     _, thresh = cv.threshold(gray_img, threshold_value, 255, 0)  #stack overflow, le threshold de filter les valeurs extremes
     return thresh
 
@@ -241,12 +254,10 @@ def contientDeja(list_center, x, y, inter=inter_contours):
                 if (list_center[i][1] >= y-inter)&(list_center[i][1] <= y+inter):
                     return True
     return False  
-
 def findContours(img, motif=None):
-    if not motif:
+    if motif is None:
         sys.exit("err::findContours motif is None")
-
-    contours, _ = cv.findContours(image=thresh,
+    contours, _ = cv.findContours(image=img,
                                   mode=cv.RETR_TREE, 
                                   method=cv.CHAIN_APPROX_SIMPLE,
                                   offset=(0,0))#RETR_LIST,
@@ -258,26 +269,83 @@ def findContours(img, motif=None):
             x,y,w,h = cv.boundingRect(c)
             if ( (x,y)!=(0,0) )&(not contientDeja(center_tab, x, y)):
                                                              #(155+(i*50)) -> du etre changer sinon contour compter comme motif pour mask[2] -> ? n'est pas sensé appliqué le mask sur une image comportnat des contours
-                cv.rectangle(img, (x, y), (x + w, y + h), (171+(motif*42), 0, 0), 2)
+                cv.rectangle(modified_mire, (x, y), (x + w, y + h), (171+(motif*42), 0, 0), 2)
                 center_tab.append((x,y,motif)) #motif in {"rond", "trait", "cercle"}
                 #print ((x,y,motif))
     
-
+def fullContoursProcess(img):
+    for i in range(0,len(mask)):
+        img_mask = maskMotif(modified_mire, mask[i])
+        if show_data[2]:
+            cv.imshow("mask"+str(i), img_mask)
+        if save_data[3]:
+            cv.imwrite("data/mask"+str(i)+".png", img_mask)
+        img_thresh = grayAndThreshold(img_mask, threshold[i], i)
+        if show_data[5]:
+            cv.imshow("thresh"+str(i), img_thresh)
+        if save_data[6]:
+            cv.imwrite("data/thresh"+str(i)+".png", img_thresh)
+        findContours(img_thresh, i)
 
 ##################################################################################################
 #                                            MAIN                                                #
 ##################################################################################################
 
-transfo = tz_rxy() @ translationXYZ(t_x,t_y,t_z) @  rotationXYZBis(r_x,r_y,r_z)
-H =  _3Dto2D() @ transfo @ _2Dto3D() 
-modImg = cv.warpPerspective(mire_orig, H, (ncols, nrows), None, borderValue=(255,255,255))
-cv.imshow("Modif", modImg)
+if show_data[0]:
+    cv.imshow("Mire originale", mire_orig)
+if save_data[1]:
+    cv.imwrite("data/mire.png", mire_orig)
 
-maskmodImg = maskMotif(modImg, mask[0])
-cv.imshow("Mask1", maskmodImg)
+t = tz_rxy() @ translationXYZ(t_x,t_y,t_z) @  rotationXYZBis(r_x,r_y,r_z)
+H =  _3Dto2D() @ t @ _2Dto3D() 
+modified_mire = cv.warpPerspective(mire_orig, H, (ncols, nrows), None, borderValue=(255,255,255))
+if show_data[1]:
+    cv.imshow("Mire transformee", modified_mire)
+if save_data[2]:
+    cv.imwrite("data/trans.png", modified_mire)
 
-grayAndThreshold
-threshmodImg = grayAndThreshold(maskmodImg, threshold[0])
-cv.imshow("Thresh1", threshmodImg)
+fullContoursProcess(modified_mire)
+if show_data[6]:
+    cv.imshow("Contours", modified_mire)
+if save_data[7]:
+    cv.imwrite("data/contours.png", modified_mire)
+
+if save_data[0]:
+    parameters = {
+        "path_mire_orig": path_mire_orig,
+        "nrows": nrows,
+        "ncols": ncols,
+        "virtual_focal": virtual_focal,
+        "virtual_focal_dist": virtual_focal_dist,
+        "t_x": t_x,
+        "t_y": t_y,
+        "t_z": t_z,
+        "r_x": r_x,
+        "r_y": r_y,
+        "r_z": r_z,
+        "bool_rxy": bool_rxy,
+        "sens_rxy": sens_rxy,
+        "sc_x": sc_x,
+        "sc_y": sc_y,
+        "sc_z": sc_z,
+        "inter_contours": inter_contours,
+        "limit_area": limit_area,
+        "mask": mask,
+        "threshold": threshold,
+        "show_data": show_data,
+        "save_data": save_data
+    }
+    generated_data = {
+        "center_tab": center_tab,
+        "t": t.tolist() if t is not None else None,
+        "H": H.tolist() if H is not None else None,  
+    }
+    with open("data/data.txt", "w") as file:
+        file.write("                -------- PARAMETRES --------\n\n")
+        for k, v in parameters.items():
+            file.write(f"{k}: {v}\n")
+        file.write("\n\n\n                -------- DONNEES GENEREES --------\n\n")
+        for k, v in generated_data.items():
+            file.write(f"{k}: {v}\n")
 
 cv.waitKey(0)

@@ -173,10 +173,9 @@ cython_debug/
 
 ###.gitignore perso
 #ouput file
-img_modif.png
 #doc doxygen
 /html
 /latex
 /rtf
-#img générés
-/img
+#données générés
+/data
