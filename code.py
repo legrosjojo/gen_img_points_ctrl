@@ -123,8 +123,42 @@ img_orig = openShowImg("mire_315a.png")
 
 modifImg = rotationImg(img_orig, 45, False)
 #modifImg = img_orig
-#modifImg = rotation3D(modifImg, 15)
+modifImg = rotation3D(modifImg, 15)
 cv.imshow("rotation3D", modifImg)
+
+
+
+#blurred = cv.GaussianBlur(modifImg, (31, 31), 0)
+#cv.imshow('Image Floutée', blurred_image)
+square_size = 20
+output_image = modifImg.copy()
+
+for y in range(512):  
+    for x in range(512):  
+        if not np.all(modifImg[y, x] == [255, 255, 255]):  
+            output_image[y:y+square_size, x:x+square_size] = [0, 0, 0]
+modifImg = output_image
+
+nrows,ncols = modifImg.shape[:2]
+new_width = ncols + 500
+new_height = nrows + 500
+new_image = np.ones((new_height, new_width, 3), dtype=np.uint8) * 255  # 255 correspond à du blanc
+x_offset = (new_width - ncols) // 2
+y_offset = (new_height - nrows) // 2
+
+new_image[y_offset:y_offset + nrows, x_offset:x_offset +ncols] = modifImg
+gray_image = cv.cvtColor(new_image, cv.COLOR_BGR2GRAY)
+_, thresh = cv.threshold(gray_image, 127, 255, cv.THRESH_BINARY_INV)
+
+
+contours, _ = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+largest_contour = max(contours, key=cv.contourArea)
+epsilon = 0.02 * cv.arcLength(largest_contour, True) 
+approx = cv.approxPolyDP(largest_contour, epsilon, True)  
+cv.polylines(new_image, [approx], isClosed=True, color=(0, 255, 0), thickness=2)
+cv.imshow("Image avec Contour Polygone", new_image)
+cv.waitKey(0)
+cv.destroyAllWindows()
 
 
 mask = [ ([38, 179, 38], [38, 179, 38]), ([0, 0, 255], [201, 201, 255]), ([0,0,0], [170,170,170])]
@@ -136,8 +170,8 @@ drawImg = modifImg
 #erreur FindContours supports only CV_8UC1 images when mode != CV_RETR_FLOODFILL
 for i in range (0,3):
     img = maskColor(modifImg,mask[i])
-    cv.imshow(str(i), img)
-    cv.imwrite("img/"+str(i)+".png", img)
+    #cv.imshow(str(i), img)
+    #cv.imwrite("img/"+str(i)+".png", img)
     #hsv -> gray -> threshold fonctionne que gray -> threshold non
     img = cv.cvtColor(img, cv.COLOR_BGR2HSV)
     img = cv.cvtColor(img, code=cv.COLOR_BGR2GRAY) #convertion image vers format CV_8UC1, içi en niveau de gris
@@ -169,7 +203,7 @@ print(len(centerTab))
 #paramètres caméra dans tout ça ?
 #cv.imshow("maskColor2", maskColor(img_orig,mask[1]) )
 #cv.imshow("maskColor3", maskColor(img_orig,mask[2]) )
-cv.imshow("contours", drawImg)
+#cv.imshow("contours", drawImg)
 cv.imwrite("img/contours.png", drawImg)
 
 key = cv.waitKey(0)

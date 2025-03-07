@@ -24,7 +24,7 @@ t_x = 0
 t_y = 0
 t_z = 0
 #rotation
-r_x = 0
+r_x = 15
 r_y = 0
 r_z = 45
 #si r_x et r_y déterminer l'odre 'xy' ou 'yx'
@@ -58,6 +58,8 @@ save_data = [True, True, True, False, False, False, False, True]
 if any(save_data):
     if not os.path.exists("data"):
         os.makedirs("data")
+
+
 
 ##################################################################################################
 #                                   FONCTION TRANSFORMATION                                      #
@@ -221,7 +223,6 @@ def scaleXYZ(scx, scy, scz):
 
 
 
-
 ##################################################################################################
 #                                      FONCTION CONTOURS                                         #
 ##################################################################################################
@@ -286,6 +287,16 @@ def fullContoursProcess(img):
         if save_data[6]:
             cv.imwrite("data/thresh"+str(i)+".png", img_thresh)
         findContours(img_thresh, i)
+
+
+
+##################################################################################################
+#                                      FONCTION ENCODAGE                                         #
+##################################################################################################
+
+def encodeur(img):
+    return
+
 
 ##################################################################################################
 #                                            MAIN                                                #
