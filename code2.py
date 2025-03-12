@@ -52,7 +52,7 @@ threshold = [100, 76, 30]
 center_tab = []
 
 #img, transformation, mask, hsv, grey, threshold, contours 
-show_data = [True, True, False, False, False, False, True]
+show_data = [True, True, True, False, False, False, True]
 #parametres + "
 save_data = [True, True, True, False, False, False, False, True]
 if any(save_data):
