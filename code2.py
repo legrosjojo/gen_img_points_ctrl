@@ -21,6 +21,8 @@ nrows, ncols = mire_orig.shape[:2]
 ## @var modified_mire
 #  Modified version of the original target image.
 modified_mire = mire_orig
+transformed_mire = mire_orig.copy()
+contours_mire=None
 
 ## @var virtual_focal
 #  Virtual focal length (default: 75 in dev mode).
@@ -46,7 +48,7 @@ t_z = 0
 # Rotation
 ## @var r_x
 #  Rotation around the X-axis.
-r_x = 15
+r_x = 0
 
 ## @var r_y
 #  Rotation around the Y-axis.
@@ -54,7 +56,7 @@ r_y = 0
 
 ## @var r_z
 #  Rotation around the Z-axis.
-r_z = 45
+r_z = -71
 
 ## @var bool_rxy
 #  Determines the rotation order 'xy' or 'yx' when both r_x and r_y are used.
@@ -108,12 +110,12 @@ center_tab = []
 angle_tab=[]
 
 ## @var show_data
-#  Flags to show different stages of processing (img, transformation, mask, hsv, grey, threshold, contours).
-show_data = [True, True, True, False, False, False, True]
+#  Flags to show different stages of processing (img, transformation, mask, hsv, grey, threshold, contours, contours min rouge).
+show_data = [True, True, True, False, False, False, True, True]
 
 ## @var save_data
 #  Flags to save different stages of processing (img, transformation, mask, hsv, grey, threshold, contours).
-save_data = [True, True, True, False, False, False, False, True]
+save_data = [True, True, True, True, False, False, False, True, True]
 
 # Create 'data' directory if any save option is enabled
 if any(save_data):
