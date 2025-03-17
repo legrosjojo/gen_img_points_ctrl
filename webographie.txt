@@ -37,3 +37,9 @@ numpy
 
 images comparaison
     https://answers.opencv.org/question/8519/image-comparison/
+
+cam rapsberry pi 
+    https://www.raspberrypi.com/documentation/computers/camera_software.html
+
+angle trait rouge 
+    https://stackoverflow.com/questions/58632469/how-to-find-the-orientation-of-an-object-shape-python-opencv

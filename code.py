@@ -160,6 +160,7 @@ cv.imshow("Image avec Contour Polygone", new_image)
 cv.waitKey(0)
 cv.destroyAllWindows()
 
+rectTab=[]
 
 mask = [ ([38, 179, 38], [38, 179, 38]), ([0, 0, 255], [201, 201, 255]), ([0,0,0], [170,170,170])]
 centerTab=[]
@@ -184,9 +185,13 @@ for i in range (0,3):
                                         mode=cv.RETR_TREE, 
                                         method=cv.CHAIN_APPROX_SIMPLE,
                                         offset=(0,0))#RETR_LIST,
+    
+
     #print(len(contours))
     #dessine et donne le milieu de chaque contours 
     for c in contours:
+            temp=cv.minAreaRect(c)
+            rectTab.append(temp[-1])
         # if cv.contourArea(c) >= 90000:
             #    print("degage")
             if cv.contourArea(c) <= limit_area :
@@ -197,13 +202,15 @@ for i in range (0,3):
                 cv.rectangle(drawImg, (x, y), (x + w, y + h), (171+(i*42), 0, 0), 2)
                 centerTab.append((x,y,i)) #motif in {"rond", "trait", "cercle"}
                 print ((x,y,i))
+print(rectTab)
+print(len(rectTab))
 print(len(centerTab))
 #faire ça pour les trois motifs,stocker tout les 'center' dans un tab, trier par coordonnées -> disposition de ma grille modif
 #faire pareil avec toutes les grilles non modif jusqu'à trouver correspondance avec ma grille modif -> finis
 #paramètres caméra dans tout ça ?
 #cv.imshow("maskColor2", maskColor(img_orig,mask[1]) )
 #cv.imshow("maskColor3", maskColor(img_orig,mask[2]) )
-#cv.imshow("contours", drawImg)
+cv.imshow("contours", drawImg)
 cv.imwrite("img/contours.png", drawImg)
 
 key = cv.waitKey(0)

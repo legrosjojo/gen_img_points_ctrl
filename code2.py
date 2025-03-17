@@ -14,7 +14,8 @@ if path_mire_orig is None:
 mire_orig = cv.imread(cv.samples.findFile(path_mire_orig)) #mire originel
 nrows, ncols = mire_orig.shape[:2]
 
-modified_mire = mire_orig
+transformed_mire = mire_orig.copy()
+contours_mire=None
 
 virtual_focal = 75 # |warning :: valeur par defaut est 75 en mode dev|
 virtual_focal_dist = ncols / (2 * np.tan(np.radians(virtual_focal / 2))) # distance focal virtuelle
@@ -24,9 +25,9 @@ t_x = 0
 t_y = 0
 t_z = 0
 #rotation
-r_x = 15
+r_x = 0
 r_y = 0
-r_z = 45
+r_z = -71
 #si r_x et r_y déterminer l'odre 'xy' ou 'yx'
 bool_rxy = None #PAS TOUCHE PTIT CON
 sens_rxy = None
@@ -46,15 +47,17 @@ else:
 
 inter_contours = 10
 limit_area = 25
+limit_extrm_angle = 5.0
 
 mask = [([38, 179, 38], [38, 179, 38]), ([0, 0, 255], [201, 201, 255]), ([0,0,0], [170,170,170])]
 threshold = [100, 76, 30]
 center_tab = []
+angle_tab=[]
 
-#img, transformation, mask, hsv, grey, threshold, contours 
-show_data = [True, True, False, False, False, False, True]
+#img, transformation, mask, hsv, grey, threshold, contours, contours min rouge 
+show_data = [True, True, False, False, False, False, True, True]
 #parametres + "
-save_data = [True, True, True, False, False, False, False, True]
+save_data = [True, True, True, True, False, False, False, True, True]
 if any(save_data):
     if not os.path.exists("data"):
         os.makedirs("data")
@@ -263,20 +266,47 @@ def findContours(img, motif=None):
                                   method=cv.CHAIN_APPROX_SIMPLE,
                                   offset=(0,0))#RETR_LIST,
     for c in contours:
-        # if cv.contourArea(c) >= 90000:
-            #    print("degage")
-            if cv.contourArea(c) <= limit_area :
-                continue    
-            x,y,w,h = cv.boundingRect(c)
-            if ( (x,y)!=(0,0) )&(not contientDeja(center_tab, x, y)):
-                                                             #(155+(i*50)) -> du etre changer sinon contour compter comme motif pour mask[2] -> ? n'est pas sensé appliqué le mask sur une image comportnat des contours
-                cv.rectangle(modified_mire, (x, y), (x + w, y + h), (171+(motif*42), 0, 0), 2)
-                center_tab.append((x,y,motif)) #motif in {"rond", "trait", "cercle"}
-                #print ((x,y,motif))
+        if cv.contourArea(c) <= limit_area :
+            continue    
+        x,y,w,h = cv.boundingRect(c)
+        if ( (x,y)!=(0,0) )&(not contientDeja(center_tab, x, y)):
+                                                        #(155+(i*50)) -> du etre changer sinon contour compter comme motif pour mask[2] -> ? n'est pas sensé appliqué le mask sur une image comportnat des contours
+            cv.rectangle(img, (x, y), (x + w, y + h), (171+(motif*42), 0, 0), 2)
+            center_tab.append((x,y,motif)) #motif in {"rond", "trait", "cercle"}
+            #print ((x,y,motif))
     
+def angleRedPattern(img): 
+    filtered_img=maskMotif(img, mask[1])
+    contours, _ = cv.findContours(image=grayAndThreshold(filtered_img, threshold[1]),
+                                  mode=cv.RETR_TREE, 
+                                  method=cv.CHAIN_APPROX_SIMPLE,
+                                  offset=(0,0))#RETR_LIST,
+    red_pattern_minAreaRect_mire=filtered_img.copy()
+    for c in contours:
+        temp=cv.minAreaRect(c)
+        angle_tab.append(temp[-1])
+        
+        if show_data[7] or save_data[7]:
+            box = cv.boxPoints(temp)
+            box = np.intp(box)
+            cv.drawContours(red_pattern_minAreaRect_mire,[box],0,(0,255,255),2)
+    Q_angle_tab=np.quantile(angle_tab, [0.25, 0.5, 0.75])
+    Q_angle_tab_mean=np.mean(Q_angle_tab)
+    i = len(angle_tab) - 1
+    while i >= 0:
+        if Q_angle_tab_mean+5 > angle_tab[i] and Q_angle_tab_mean-5 < angle_tab[i]:
+            angle_tab.pop(i)
+        i -= 1
+    print(angle_tab)
+    if show_data[7]:
+        cv.imshow("minAreaRectRedPattern",red_pattern_minAreaRect_mire)
+    if save_data[8]:
+        cv.imwrite("minAreaRectRedPattern.png", red_pattern_minAreaRect_mire)
+    return int(np.abs(Q_angle_tab_mean - 90)) 
+
 def fullContoursProcess(img):
     for i in range(0,len(mask)):
-        img_mask = maskMotif(modified_mire, mask[i])
+        img_mask = maskMotif(transformed_mire, mask[i])
         if show_data[2]:
             cv.imshow("mask"+str(i), img_mask)
         if save_data[3]:
@@ -295,7 +325,7 @@ def fullContoursProcess(img):
 ##################################################################################################
 
 def encodeur(img):
-    return
+    return None
 
 
 ##################################################################################################
@@ -309,17 +339,22 @@ if save_data[1]:
 
 t = tz_rxy() @ translationXYZ(t_x,t_y,t_z) @  rotationXYZBis(r_x,r_y,r_z)
 H =  _3Dto2D() @ t @ _2Dto3D() 
-modified_mire = cv.warpPerspective(mire_orig, H, (ncols, nrows), None, borderValue=(255,255,255))
+transformed_mire = cv.warpPerspective(mire_orig, H, (ncols, nrows), None, borderValue=(255,255,255))
 if show_data[1]:
-    cv.imshow("Mire transformee", modified_mire)
+    cv.imshow("Mire transformee", transformed_mire)
 if save_data[2]:
-    cv.imwrite("data/trans.png", modified_mire)
+    cv.imwrite("data/trans.png", transformed_mire)
 
-fullContoursProcess(modified_mire)
+contours_mire=transformed_mire
+fullContoursProcess(contours_mire)
 if show_data[6]:
-    cv.imshow("Contours", modified_mire)
+    cv.imshow("Contours", contours_mire)
 if save_data[7]:
-    cv.imwrite("data/contours.png", modified_mire)
+    cv.imwrite("data/contours.png", contours_mire)
+
+angle = angleRedPattern(transformed_mire)
+print(angle)
+
 
 if save_data[0]:
     parameters = {
@@ -348,6 +383,7 @@ if save_data[0]:
     }
     generated_data = {
         "center_tab": center_tab,
+        "angle_tab": angle_tab,
         "t": t.tolist() if t is not None else None,
         "H": H.tolist() if H is not None else None,  
     }
@@ -360,3 +396,5 @@ if save_data[0]:
             file.write(f"{k}: {v}\n")
 
 cv.waitKey(0)
+
+#libcamera pour
