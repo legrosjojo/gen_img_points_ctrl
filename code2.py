@@ -4,64 +4,121 @@ import sys
 import os
 
 
-##################################################################################################
-#                                           DEFINE                                               #
-##################################################################################################
-
-path_mire_orig = "mire_315a.png" #chemin de la mire orignel
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+#                                           DEFINE                                              #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+## @var path_mire_orig
+#  Path to the original target image.
+path_mire_orig = "mire_315a.png"
 if path_mire_orig is None:
-        sys.exit("err::Could not read the image.")    
-mire_orig = cv.imread(cv.samples.findFile(path_mire_orig)) #mire originel
+    sys.exit("err::Could not read the image.")
+
+## @var mire_orig
+#  Original target image.
+mire_orig = cv.imread(cv.samples.findFile(path_mire_orig))
 nrows, ncols = mire_orig.shape[:2]
 
-transformed_mire = mire_orig.copy()
-contours_mire=None
+## @var modified_mire
+#  Modified version of the original target image.
+modified_mire = mire_orig
 
-virtual_focal = 75 # |warning :: valeur par defaut est 75 en mode dev|
-virtual_focal_dist = ncols / (2 * np.tan(np.radians(virtual_focal / 2))) # distance focal virtuelle
+## @var virtual_focal
+#  Virtual focal length (default: 75 in dev mode).
+virtual_focal = 75
 
-#translation
+## @var virtual_focal_dist
+#  Virtual focal distance.
+virtual_focal_dist = ncols / (2 * np.tan(np.radians(virtual_focal / 2)))
+
+# Translation
+## @var t_x
+#  Translation along the X-axis.
 t_x = 0
+
+## @var t_y
+#  Translation along the Y-axis.
 t_y = 0
+
+## @var t_z
+#  Translation along the Z-axis.
 t_z = 0
-#rotation
-r_x = 0
+
+# Rotation
+## @var r_x
+#  Rotation around the X-axis.
+r_x = 15
+
+## @var r_y
+#  Rotation around the Y-axis.
 r_y = 0
-r_z = -71
-#si r_x et r_y déterminer l'odre 'xy' ou 'yx'
-bool_rxy = None #PAS TOUCHE PTIT CON
+
+## @var r_z
+#  Rotation around the Z-axis.
+r_z = 45
+
+## @var bool_rxy
+#  Determines the rotation order 'xy' or 'yx' when both r_x and r_y are used.
+bool_rxy = None  # PAS TOUCHE PTIT CON
+
+## @var sens_rxy
+#  Specifies the rotation order ('xy' or 'yx') when both r_x and r_y are used.
 sens_rxy = None
-#scale |warning :: valeur par defaut est 1|
+
+# Scale
+## @var sc_x
+#  Scaling factor along the X-axis (default: 1).
 sc_x = 1
+
+## @var sc_y
+#  Scaling factor along the Y-axis (default: 1).
 sc_y = 1
+
+## @var sc_z
+#  Scaling factor along the Z-axis (default: 1).
 sc_z = 1
 
-#important pour la translation z obligatoire en cas de rotation X et/ou Y 
-if (not r_x==0)and(not r_y==0):
+# Important for Z-translation when both X and Y rotations are applied
+if (not r_x == 0) and (not r_y == 0):
     bool_rxy = True
-    if sens_rxy not in ['xy','yx']:
+    if sens_rxy not in ['xy', 'yx']:
         sys.exit("err::sens_rxy")
 else:
-    bool_rxy = False 
+    bool_rxy = False
 
-
+## @var inter_contours
+#  Inter-contour spacing.
 inter_contours = 10
+
+## @var limit_area
+#  Minimum contour area to be considered.
 limit_area = 25
 limit_extrm_angle = 5.0
 
-mask = [([38, 179, 38], [38, 179, 38]), ([0, 0, 255], [201, 201, 255]), ([0,0,0], [170,170,170])]
+## @var mask
+#  List of color masks.
+mask = [([38, 179, 38], [38, 179, 38]), ([0, 0, 255], [201, 201, 255]), ([0, 0, 0], [170, 170, 170])]
+
+## @var threshold
+#  Threshold values for each mask.
 threshold = [100, 76, 30]
+
+## @var center_tab
+#  List of detected contour centers.
 center_tab = []
 angle_tab=[]
 
-#img, transformation, mask, hsv, grey, threshold, contours, contours min rouge 
-show_data = [True, True, False, False, False, False, True, True]
-#parametres + "
-save_data = [True, True, True, True, False, False, False, True, True]
+## @var show_data
+#  Flags to show different stages of processing (img, transformation, mask, hsv, grey, threshold, contours).
+show_data = [True, True, True, False, False, False, True]
+
+## @var save_data
+#  Flags to save different stages of processing (img, transformation, mask, hsv, grey, threshold, contours).
+save_data = [True, True, True, False, False, False, False, True]
+
+# Create 'data' directory if any save option is enabled
 if any(save_data):
     if not os.path.exists("data"):
         os.makedirs("data")
-
 
 
 ##################################################################################################
@@ -73,6 +130,18 @@ if any(save_data):
 #   
 
 def _2Dto3D():
+    '''
+    This function creates a 2D to 3D transformation matrix that centers the image coordinates.
+
+    Args:
+        None
+
+    Returns:
+        np.ndarray: A 4x4 transformation matrix of type float32.
+
+    Examples:
+        >>> matrix = _2Dto3D()
+    '''
     return np.array([
         [1, 0, -(ncols/2)],
         [0, 1, -(nrows/2)],
@@ -81,6 +150,18 @@ def _2Dto3D():
     ], dtype=np.float32)
 
 def _3Dto2D():
+    '''
+    This function creates a 3D to 2D projection matrix to simulate a virtual camera.
+
+    Args:
+        None
+
+    Returns:
+        np.ndarray: A 3x4 projection matrix of type float32.
+
+    Examples:
+        >>> projection_matrix = _3Dto2D()
+    '''
     return np.array([
         [virtual_focal_dist, 0, ncols/2, 0],
         [0, virtual_focal_dist, nrows/2, 0],
@@ -122,6 +203,26 @@ def _3Dto2D():
 #
 
 def rotationXYZ(axis, degXYZ=None):
+    '''
+    This function creates a 4x4 rotation matrix around a specified axis (X, Y, or Z) by a given angle in degrees.
+
+    Args:
+        axis (str): The axis of rotation ('x', 'y', or 'z').
+        degXYZ (float, optional): The angle of rotation in degrees. Defaults to None.
+
+    Returns:
+        np.ndarray: A 4x4 rotation matrix of type float32. If no angle is provided, returns the identity matrix.
+
+    Examples:
+        >>> rot_x = rotationXYZ('x', 45)
+        >>> rot_y = rotationXYZ('y', 30)
+        >>> rot_z = rotationXYZ('z', 90)
+        >>> identity = rotationXYZ('x')
+
+    Notes:
+        - Uses radians for trigonometric functions.
+        - The matrix is compatible with `cv.warpPerspective` due to dtype=np.float32.
+    '''
     if degXYZ :
         if axis.lower() in ['x','y','z']:
             radXYZ = np.radians(degXYZ) #np.cos et np.sin fonctionnent en radians
@@ -151,6 +252,26 @@ def rotationXYZ(axis, degXYZ=None):
     return np.eye(4)
 
 def rotationXYZBis(rx=1, ry=1, rz=0):
+    '''
+    This function creates a 4x4 rotation matrix combining rotations around the X, Y, and Z axes.
+
+    Args:
+        rx (float, optional): Rotation angle around the X-axis in degrees. Defaults to 1.
+        ry (float, optional): Rotation angle around the Y-axis in degrees. Defaults to 1.
+        rz (float, optional): Rotation angle around the Z-axis in degrees. Defaults to 0.
+
+    Returns:
+        np.ndarray: A 4x4 rotation matrix of type float32.
+
+    Examples:
+        >>> rot_matrix = rotationXYZBis(45, 30, 60)
+        >>> identity = rotationXYZBis(0, 0, 0)
+
+    Notes:
+        - Uses radians for trigonometric functions.
+        - The matrix is compatible with `cv.warpPerspective` due to dtype=np.float32.
+        - Combines the rotations around each axis in a single matrix.
+    '''
     radX, radY, radZ = np.radians(rx), np.radians(ry), np.radians(rz)
     cosX, cosY, cosZ = np.cos(radX), np.cos(radY), np.cos(radZ)
     sinX, sinY, sinZ = np.sin(radX), np.sin(radY), np.sin(radZ)
@@ -177,6 +298,25 @@ def rotationXYZBis(rx=1, ry=1, rz=0):
 #
 
 def translationXYZ(tx=0, ty=0, tz=0):
+    '''
+    This function creates a 4x4 translation matrix to move an object along the X, Y, and Z axes.
+
+    Args:
+        tx (float, optional): Translation along the X-axis. Defaults to 0.
+        ty (float, optional): Translation along the Y-axis. Defaults to 0.
+        tz (float, optional): Translation along the Z-axis. Defaults to 0.
+
+    Returns:
+        np.ndarray: A 4x4 translation matrix of type float32.
+
+    Examples:
+        >>> translation = translationXYZ(10, 20, 30)
+        >>> no_translation = translationXYZ()
+
+    Notes:
+        - The matrix is compatible with `cv.warpPerspective` due to dtype=np.float32.
+        - Can be combined with rotation matrices for more complex transformations.
+    '''
     return np.array([
         [1, 0, 0, tx],
         [0, 1, 0, ty],
@@ -186,6 +326,23 @@ def translationXYZ(tx=0, ty=0, tz=0):
 
 #VOIR AVEC DOIGNON :doit toujours être applique, la projection en perspective -> 2Dto3D -> 3Dto2D -> warpPerspective n'aime pas quand tout les points ont une coordonnees z=0 ou tres proche de 0, on force donc une translation en z qui correspond juste à un decalage de l'image dans l'espace (donc aucune transformation geometrique) pour devier ce probleme
 def tz_rxy():
+    '''
+    This function creates a 4x4 translation matrix along the Z-axis, typically used to simulate perspective effects.
+
+    Args:
+        None
+
+    Returns:
+        np.ndarray: A 4x4 translation matrix of type float32.
+
+    Examples:
+        >>> tz_matrix = tz_rxy()
+
+    Notes:
+        - Translates along the Z-axis by the value of `virtual_focal_dist`.
+        - Compatible with `cv.warpPerspective` due to dtype=np.float32.
+        - The parameter `virtual_focal_dist` should be defined globally before calling this function.
+    '''
 #    if (r_x==0)and(r_y==0):
 #        print('yep')
 #        return np.eye(4)
@@ -211,6 +368,25 @@ def tz_rxy():
 #
 
 def scaleXYZ(scx, scy, scz):
+    '''
+    This function creates a 4x4 scaling matrix to apply scaling transformations along the X, Y, and Z axes.
+
+    Args:
+        scx (float): Scaling factor along the X-axis.
+        scy (float): Scaling factor along the Y-axis.
+        scz (float): Scaling factor along the Z-axis.
+
+    Returns:
+        np.ndarray: A 4x4 scaling matrix of type float32.
+
+    Examples:
+        >>> scale_matrix = scaleXYZ(2, 2, 2)  # Uniform scaling
+        >>> stretch_x = scaleXYZ(1.5, 1, 1)   # Stretch along X-axis
+
+    Notes:
+        - Compatible with `cv.warpPerspective` due to dtype=np.float32.
+        - Can be combined with translation and rotation matrices for more complex transformations.
+    '''
     return np.array([
         [scx, 0, 0, 0],
         [0, scy, 0, 0],
@@ -231,12 +407,51 @@ def scaleXYZ(scx, scy, scz):
 ##################################################################################################
 
 def maskMotif(img, inter_motif):  #BGR vert:[38, 179, 38] rouge:[0, 0, 255] noir:[0,0,0]
+    '''
+    This function creates a mask to filter specific color ranges in an image and replaces them with a specified color.
+
+    Args:
+        img (np.ndarray): Input image (BGR format).
+        inter_motif (list of list): List containing two BGR color values representing the lower and upper bounds of the color range to mask.
+
+    Returns:
+        np.ndarray: Filtered image where the detected colors are replaced by the lower bound color of `inter_motif`.
+
+    Examples:
+        >>> inter_motif = [[38, 179, 38], [0, 0, 255]]  # Green and Red in BGR
+        >>> masked_img = maskMotif(input_image, inter_motif)
+
+    Notes:
+        - `cv.inRange` is used to create the mask, detecting pixels within the specified BGR range.
+        - Pixels in the range are replaced by `inter_motif[0]` in the output image.
+        - The result is an image with the same shape and type as the input but with masked areas replaced.
+    '''
     mask = cv.inRange(img, np.array(inter_motif[0], dtype=np.uint8), np.array(inter_motif[1], dtype=np.uint8))
     filtered_img = np.full_like(img,255, dtype=np.uint8)
     filtered_img[mask > 0] = inter_motif[0] #if [201, 201, 255] is None else [0, 0, 255]
     return filtered_img
 
 def grayAndThreshold(img, threshold_value, i=None):
+    '''
+    Converts an image to HSV, then to grayscale, and applies a threshold.
+
+    Args:
+        img (np.ndarray): Input image in BGR format.
+        threshold_value (int): Threshold value used for binarization (0 to 255).
+        i (int, optional): Index used for saving and displaying images, useful in iterative processes.
+
+    Returns:
+        np.ndarray: Thresholded binary image.
+
+    Examples:
+        >>> thresh_img = grayAndThreshold(input_image, 127)
+
+    Notes:
+        - Converts the input BGR image to HSV before converting to grayscale.
+        - Displays intermediate HSV and grayscale images if `show_data` is enabled.
+        - Saves intermediate images if `save_data` is enabled.
+        - Uses `cv.threshold` to filter extreme values in the grayscale image.
+    '''
     #hsv -> gray -> threshold fonctionne que gray -> threshold non
     hsv_img = cv.cvtColor(img, cv.COLOR_BGR2HSV)
     if show_data[3]:
@@ -252,13 +467,69 @@ def grayAndThreshold(img, threshold_value, i=None):
     return thresh
 
 def contientDeja(list_center, x, y, inter=inter_contours):
+    '''
+    Checks if a point (x, y) is already present in a list of centers within a given tolerance.
+
+    Args:
+        list_center (list of tuples): List of (x, y) coordinates representing centers.
+        x (int or float): X-coordinate of the point to check.
+        y (int or float): Y-coordinate of the point to check.
+        inter (int, optional): Tolerance for considering points as duplicates (default is inter_contours).
+
+    Returns:
+        bool: True if the point (x, y) is already in the list within the tolerance, False otherwise.
+
+    Examples:
+        >>> centers = [(100, 200), (150, 250)]
+        >>> contientDeja(centers, 102, 198, 5)
+        True
+        >>> contientDeja(centers, 300, 400, 5)
+        False
+
+    Notes:
+        - Compares each point in `list_center` with (x, y) using a square region of ±`inter` pixels.
+        - Returns True as soon as a match is found.
+    '''
     if len(list_center) > 0 :
         for i in range (0,len(list_center)):
             if (list_center[i][0] >= x-inter)&(list_center[i][0] <= x+inter) :
                 if (list_center[i][1] >= y-inter)&(list_center[i][1] <= y+inter):
                     return True
     return False  
+
 def findContours(img, motif=None):
+    """
+    Finds contours in a binary image and draws bounding rectangles around the detected contours, 
+    adding their centers to a global list `center_tab`.
+
+    Args:
+        img (numpy.ndarray): Binary image (usually obtained after thresholding).
+        motif (int): Identifier for the type of contour detected (e.g., "rond", "trait", "cercle"). 
+                     Must be provided; otherwise, the function will exit.
+
+    Returns:
+        None: The function modifies the global variable `modified_mire` by drawing rectangles and updates `center_tab`.
+
+    Raises:
+        SystemExit: If `motif` is None, the program exits with an error message.
+
+    Notes:
+        - Uses `cv.findContours` with `cv.RETR_TREE` to retrieve the full hierarchy of contours.
+        - Filters contours by area using the global `limit_area` variable.
+        - Checks for duplicate contours using the `contientDeja` function before adding new ones.
+        - Draws rectangles around detected contours in `modified_mire` with color depending on `motif`.
+
+    Example:
+        >>> binary_img = cv.imread("example.png", cv.IMREAD_GRAYSCALE)
+        >>> _, thresh_img = cv.threshold(binary_img, 127, 255, cv.THRESH_BINARY)
+        >>> findContours(thresh_img, motif=1)
+
+    Global Variables:
+        - center_tab (list): Stores detected contour centers with their motifs.
+        - modified_mire (numpy.ndarray): Image where rectangles are drawn.
+        - limit_area (int): Minimum area required for a contour to be considered.
+
+    """
     if motif is None:
         sys.exit("err::findContours motif is None")
     contours, _ = cv.findContours(image=img,
@@ -305,6 +576,35 @@ def angleRedPattern(img):
     return int(np.abs(Q_angle_tab_mean - 90)) 
 
 def fullContoursProcess(img):
+    """
+    Full contour detection process on an image, applying masking, thresholding, and contour detection 
+    for each mask defined in the global `mask` list. Results are displayed and/or saved based on global flags.
+
+    Args:
+        img (numpy.ndarray): Input image to process.
+
+    Returns:
+        None: The function modifies global variables (`modified_mire`, `center_tab`) and optionally saves intermediate steps.
+
+    Notes:
+        - The function loops over predefined masks (`mask`), applying each mask to the input image using `maskMotif`.
+        - Applies grayscale conversion and thresholding with `grayAndThreshold`.
+        - Detects contours in the thresholded image with `findContours`.
+        - Optionally displays and saves intermediate results (`mask`, `thresholded` images) based on global `show_data` and `save_data`.
+
+    Global Variables:
+        - mask (list): List of color ranges used for masking.
+        - threshold (list): List of threshold values used for contour detection.
+        - modified_mire (numpy.ndarray): Image where detected contours and bounding boxes are drawn.
+        - show_data (list): Flags controlling which intermediate steps are displayed.
+        - save_data (list): Flags controlling which intermediate steps are saved.
+        - center_tab (list): Stores detected contour centers with their motifs.
+
+    Example:
+        >>> img = cv.imread("example.png")
+        >>> fullContoursProcess(img)
+
+    """
     for i in range(0,len(mask)):
         img_mask = maskMotif(transformed_mire, mask[i])
         if show_data[2]:
