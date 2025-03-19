@@ -2,6 +2,7 @@ import cv2 as cv # type: ignore
 import numpy as np
 import sys
 import os
+import math
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
@@ -121,6 +122,9 @@ save_data = [True, True, True, True, False, False, False, True, True]
 if any(save_data):
     if not os.path.exists("data"):
         os.makedirs("data")
+## @var max_distance_search_pixel
+#  Maximum radius of pixel for pixel searching (default : 50)
+max_distance_search_pixel = 50
 
 
 ##################################################################################################
@@ -549,6 +553,35 @@ def findContours(img, motif=None):
             #print ((x,y,motif))
     
 def angleRedPattern(img):
+    """
+    Analyzes an image to detect red patterns and calculates the average orientation angle of these patterns.
+
+    Args:
+        img (numpy.ndarray): Input image to process.
+
+    Returns:
+        int: The average orientation angle of the detected red patterns.
+
+    Notes:
+        - Applies a mask to the input image using `maskMotif` to isolate red patterns.
+        - Converts the masked image to grayscale and applies thresholding with `grayAndThreshold`.
+        - Detects contours in the thresholded image using `cv.findContours`.
+        - Calculates the minimum area rectangle for each contour and stores its orientation angle.
+        - Filters out outlier angles based on quantile analysis.
+        - Optionally displays and saves intermediate results based on global `show_data` and `save_data` flags.
+
+    Global Variables:
+        - mask (list): List of color ranges used for masking.
+        - threshold (list): List of threshold values used for contour detection.
+        - angle_tab (list): Stores the orientation angles of detected patterns.
+        - show_data (list): Flags controlling which intermediate steps are displayed.
+        - save_data (list): Flags controlling which intermediate steps are saved.
+
+    Example:
+        >>> img = cv.imread("example.png")
+        >>> average_angle = angleRedPattern(img)
+        >>> print(f"Average orientation angle of red patterns: {average_angle} degrees")
+    """
     filtered_img=maskMotif(img, mask[1])
     contours, _ = cv.findContours(image=grayAndThreshold(filtered_img, threshold[1]),
                                   mode=cv.RETR_TREE, 
@@ -621,6 +654,52 @@ def fullContoursProcess(img):
         if save_data[6]:
             cv.imwrite("data/thresh"+str(i)+".png", img_thresh)
         findContours(img_thresh, i)
+
+
+def find_pixel_dir(img, start_x, start_y, dir, target_color):
+    """
+    Searches for a pixel of a specified color along a direction from a starting point in an image.
+
+    Args:
+        img (numpy.ndarray): Input image to process.
+        start_x (int): X-coordinate of the starting point.
+        start_y (int): Y-coordinate of the starting point.
+        dir (float): Direction in degrees to search from the starting point.
+        target_color (list): Target color to search for in BGR format.
+
+    Returns:
+        tuple or None: Coordinates (x, y) of the first pixel found with the target color, or None if no such pixel is found.
+
+    Notes:
+        - Converts the direction from degrees to radians.
+        - Calculates the endpoint of the search line based on a predefined maximum search distance (`max_distance_search_pixel`).
+        - Uses OpenCV's `cv.line` to draw a virtual line on a blank image to identify pixels along the search path.
+        - Iterates over the pixels on this line to check for the target color.
+        - Returns the coordinates of the first matching pixel found.
+
+    Example:
+        >>> img = cv.imread("example.png")
+        >>> start_x, start_y = 100, 100
+        >>> direction = 45.0
+        >>> target_color = [0, 0, 255]  # Red in BGR
+        >>> result = find_pixel_dir(img, start_x, start_y, direction, target_color)
+        >>> if result:
+        >>>     print(f"Pixel found at: {result}")
+        >>> else:
+        >>>     print("No pixel found.")
+    """
+    direction_radians = math.radians(dir)
+    end_x = int(start_x + max_distance_search_pixel * math.cos(direction_radians))
+    end_y = int(start_y + max_distance_search_pixel * math.sin(direction_radians))
+    line_points = cv.line(np.zeros_like(img), (start_x, start_y), (end_x, end_y), (255, 255, 255), 1)
+
+    for y in range(line_points.shape[0]):
+        for x in range(line_points.shape[1]):
+            if all(line_points[y, x] == [255, 255, 255]):
+                if all(img[y, x] == target_color):
+                    return (x, y)
+    return None
+
 
 
 
