@@ -43,12 +43,12 @@ t_y = 0
 
 ## @var t_z
 #  Translation along the Z-axis.
-t_z = 0
+t_z = 10
 
 # Rotation
 ## @var r_x
 #  Rotation around the X-axis.
-r_x = 0
+r_x = 10
 
 ## @var r_y
 #  Rotation around the Y-axis.
@@ -56,7 +56,7 @@ r_y = 0
 
 ## @var r_z
 #  Rotation around the Z-axis.
-r_z = -71
+r_z = 15
 
 ## @var bool_rxy
 #  Determines the rotation order 'xy' or 'yx' when both r_x and r_y are used.
@@ -114,7 +114,7 @@ angle_tab=[]
 show_data = [True, True, True, False, False, False, True, True]
 
 ## @var save_data
-#  Flags to save different stages of processing (img, transformation, mask, hsv, grey, threshold, contours).
+#  Flags to save different stages of processing (parameters, img, transformation, mask, hsv, grey, threshold, contours, contours min rouge).
 save_data = [True, True, True, True, False, False, False, True, True]
 
 # Create 'data' directory if any save option is enabled
@@ -548,7 +548,7 @@ def findContours(img, motif=None):
             center_tab.append((x,y,motif)) #motif in {"rond", "trait", "cercle"}
             #print ((x,y,motif))
     
-def angleRedPattern(img): 
+def angleRedPattern(img):
     filtered_img=maskMotif(img, mask[1])
     contours, _ = cv.findContours(image=grayAndThreshold(filtered_img, threshold[1]),
                                   mode=cv.RETR_TREE, 
@@ -557,6 +557,7 @@ def angleRedPattern(img):
     red_pattern_minAreaRect_mire=filtered_img.copy()
     for c in contours:
         temp=cv.minAreaRect(c)
+        print(temp)
         angle_tab.append(temp[-1])
         
         if show_data[7] or save_data[7]:
@@ -567,15 +568,16 @@ def angleRedPattern(img):
     Q_angle_tab_mean=np.mean(Q_angle_tab)
     i = len(angle_tab) - 1
     while i >= 0:
-        if Q_angle_tab_mean+5 > angle_tab[i] and Q_angle_tab_mean-5 < angle_tab[i]:
+        if Q_angle_tab_mean+5 < angle_tab[i] or Q_angle_tab_mean-5 > angle_tab[i]:
             angle_tab.pop(i)
         i -= 1
-    print(angle_tab)
+    angle_tab_mean=np.mean(angle_tab)
     if show_data[7]:
         cv.imshow("minAreaRectRedPattern",red_pattern_minAreaRect_mire)
     if save_data[8]:
         cv.imwrite("minAreaRectRedPattern.png", red_pattern_minAreaRect_mire)
-    return int(np.abs(Q_angle_tab_mean - 90)) 
+
+    return int(angle_tab_mean)
 
 def fullContoursProcess(img):
     """

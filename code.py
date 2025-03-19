@@ -213,6 +213,12 @@ print(len(centerTab))
 cv.imshow("contours", drawImg)
 cv.imwrite("img/contours.png", drawImg)
 
+
+
+trans=cv.imread(cv.samples.findFile("data/trans.png"))
+cv.imshow("testss", trans)
+trans_modified=rotationImg(trans, -15, False)
+cv.imshow("testss_mmodified", trans_modified)
 key = cv.waitKey(0)
 if key == ord('s'):
     saveImg(modifImg)
