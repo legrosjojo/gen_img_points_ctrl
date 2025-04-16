@@ -3,6 +3,11 @@ import numpy as np
 import sys
 import os
 import math
+import tkinter
+import tkinter.messagebox
+import cv2 as cv
+import numpy as np
+import customtkinter
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
@@ -112,7 +117,7 @@ angle_tab=[]
 
 ## @var show_data
 #  Flags to show different stages of processing (img, transformation, mask, hsv, grey, threshold, contours, contours min rouge).
-show_data = [True, True, True, False, False, False, True, True]
+show_data = [False, False, False, False, False, False, False, False]
 
 ## @var save_data
 #  Flags to save different stages of processing (parameters, img, transformation, mask, hsv, grey, threshold, contours, contours min rouge).
@@ -590,7 +595,7 @@ def angleRedPattern(img):
     red_pattern_minAreaRect_mire=filtered_img.copy()
     for c in contours:
         temp=cv.minAreaRect(c)
-        print(temp)
+        #print(temp)
         angle_tab.append(temp[-1])
         
         if show_data[7] or save_data[7]:
@@ -715,69 +720,71 @@ def encodeur(img):
 #                                            MAIN                                                #
 ##################################################################################################
 
-if show_data[0]:
-    cv.imshow("Mire originale", mire_orig)
-if save_data[1]:
-    cv.imwrite("data/mire.png", mire_orig)
+def main():
 
-t = tz_rxy() @ translationXYZ(t_x,t_y,t_z) @  rotationXYZBis(r_x,r_y,r_z)
-H =  _3Dto2D() @ t @ _2Dto3D() 
-transformed_mire = cv.warpPerspective(mire_orig, H, (ncols, nrows), None, borderValue=(255,255,255))
-if show_data[1]:
-    cv.imshow("Mire transformee", transformed_mire)
-if save_data[2]:
-    cv.imwrite("data/trans.png", transformed_mire)
+    if show_data[0]:
+        cv.imshow("Mire originale", mire_orig)
+    if save_data[1]:
+        cv.imwrite("data/mire.png", mire_orig)
 
-contours_mire=transformed_mire
-fullContoursProcess(contours_mire)
-if show_data[6]:
-    cv.imshow("Contours", contours_mire)
-if save_data[7]:
-    cv.imwrite("data/contours.png", contours_mire)
+    t = tz_rxy() @ translationXYZ(t_x,t_y,t_z) @  rotationXYZBis(r_x,r_y,r_z)
+    H =  _3Dto2D() @ t @ _2Dto3D() 
+    transformed_mire = cv.warpPerspective(mire_orig, H, (ncols, nrows), None, borderValue=(255,255,255))
+    if show_data[1]:
+        cv.imshow("Mire transformee", transformed_mire)
+    if save_data[2]:
+        cv.imwrite("data/trans.png", transformed_mire)
 
-angle = angleRedPattern(transformed_mire)
-print(angle)
+    contours_mire=transformed_mire
+    fullContoursProcess(contours_mire)
+    if show_data[6]:
+        cv.imshow("Contours", contours_mire)
+    if save_data[7]:
+        cv.imwrite("data/contours.png", contours_mire)
+
+    angle = angleRedPattern(transformed_mire)
+    print(angle)
 
 
-if save_data[0]:
-    parameters = {
-        "path_mire_orig": path_mire_orig,
-        "nrows": nrows,
-        "ncols": ncols,
-        "virtual_focal": virtual_focal,
-        "virtual_focal_dist": virtual_focal_dist,
-        "t_x": t_x,
-        "t_y": t_y,
-        "t_z": t_z,
-        "r_x": r_x,
-        "r_y": r_y,
-        "r_z": r_z,
-        "bool_rxy": bool_rxy,
-        "sens_rxy": sens_rxy,
-        "sc_x": sc_x,
-        "sc_y": sc_y,
-        "sc_z": sc_z,
-        "inter_contours": inter_contours,
-        "limit_area": limit_area,
-        "mask": mask,
-        "threshold": threshold,
-        "show_data": show_data,
-        "save_data": save_data
-    }
-    generated_data = {
-        "center_tab": center_tab,
-        "angle_tab": angle_tab,
-        "t": t.tolist() if t is not None else None,
-        "H": H.tolist() if H is not None else None,  
-    }
-    with open("data/data.txt", "w") as file:
-        file.write("                -------- PARAMETRES --------\n\n")
-        for k, v in parameters.items():
-            file.write(f"{k}: {v}\n")
-        file.write("\n\n\n                -------- DONNEES GENEREES --------\n\n")
-        for k, v in generated_data.items():
-            file.write(f"{k}: {v}\n")
+    if save_data[0]:
+        parameters = {
+            "path_mire_orig": path_mire_orig,
+            "nrows": nrows,
+            "ncols": ncols,
+            "virtual_focal": virtual_focal,
+            "virtual_focal_dist": virtual_focal_dist,
+            "t_x": t_x,
+            "t_y": t_y,
+            "t_z": t_z,
+            "r_x": r_x,
+            "r_y": r_y,
+            "r_z": r_z,
+            "bool_rxy": bool_rxy,
+            "sens_rxy": sens_rxy,
+            "sc_x": sc_x,
+            "sc_y": sc_y,
+            "sc_z": sc_z,
+            "inter_contours": inter_contours,
+            "limit_area": limit_area,
+            "mask": mask,
+            "threshold": threshold,
+            "show_data": show_data,
+            "save_data": save_data
+        }
+        generated_data = {
+            "center_tab": center_tab,
+            "angle_tab": angle_tab,
+            "t": t.tolist() if t is not None else None,
+            "H": H.tolist() if H is not None else None,  
+        }
+        with open("data/data.txt", "w") as file:
+            file.write("                -------- PARAMETRES --------\n\n")
+            for k, v in parameters.items():
+                file.write(f"{k}: {v}\n")
+            file.write("\n\n\n                -------- DONNEES GENEREES --------\n\n")
+            for k, v in generated_data.items():
+                file.write(f"{k}: {v}\n")
 
-cv.waitKey(0)
+    cv.waitKey(0)
 
 #libcamera pour
