@@ -121,7 +121,7 @@ show_data = [False, False, False, False, False, False, False, False]
 
 ## @var save_data
 #  Flags to save different stages of processing (parameters, img, transformation, mask, hsv, grey, threshold, contours, contours min rouge).
-save_data = [True, True, True, True, False, False, False, True, True]
+save_data = [False, False, False, False, False, False, False, False, False]
 
 # Create 'data' directory if any save option is enabled
 if any(save_data):
@@ -510,52 +510,60 @@ def contientDeja(list_center, x, y, inter=inter_contours):
 
 def findContours(img, motif=None):
     """
-    Finds contours in a binary image and draws bounding rectangles around the detected contours, 
-    adding their centers to a global list `center_tab`.
+    Finds contours in a binary image and calculates the center of each contour,
+    adding the center coordinates and motif type to the global list `center_tab`.
 
     Args:
         img (numpy.ndarray): Binary image (usually obtained after thresholding).
-        motif (int): Identifier for the type of contour detected (e.g., "rond", "trait", "cercle"). 
+        motif (int): Identifier for the type of contour detected (e.g., "rond", "trait", "cercle").
                      Must be provided; otherwise, the function will exit.
 
     Returns:
-        None: The function modifies the global variable `modified_mire` by drawing rectangles and updates `center_tab`.
+        None: The function modifies the global variable `center_tab`.
 
     Raises:
         SystemExit: If `motif` is None, the program exits with an error message.
 
     Notes:
-        - Uses `cv.findContours` with `cv.RETR_TREE` to retrieve the full hierarchy of contours.
+        - Uses `cv.findContours` to retrieve the contours.
         - Filters contours by area using the global `limit_area` variable.
+        - Calculates the centroid (center) of each contour using `cv.moments`.
         - Checks for duplicate contours using the `contientDeja` function before adding new ones.
-        - Draws rectangles around detected contours in `modified_mire` with color depending on `motif`.
-
-    Example:
-        >>> binary_img = cv.imread("example.png", cv.IMREAD_GRAYSCALE)
-        >>> _, thresh_img = cv.threshold(binary_img, 127, 255, cv.THRESH_BINARY)
-        >>> findContours(thresh_img, motif=1)
 
     Global Variables:
         - center_tab (list): Stores detected contour centers with their motifs.
-        - modified_mire (numpy.ndarray): Image where rectangles are drawn.
         - limit_area (int): Minimum area required for a contour to be considered.
-
     """
     if motif is None:
         sys.exit("err::findContours motif is None")
-    contours, _ = cv.findContours(image=img,
-                                  mode=cv.RETR_TREE, 
-                                  method=cv.CHAIN_APPROX_SIMPLE,
-                                  offset=(0,0))#RETR_LIST,
+
+    contours, _ = cv.findContours(
+        image=img,
+        mode=cv.RETR_TREE,
+        method=cv.CHAIN_APPROX_SIMPLE,
+        offset=(0, 0)
+    )  # RETR_LIST,
+
     for c in contours:
-        if cv.contourArea(c) <= limit_area :
-            continue    
-        x,y,w,h = cv.boundingRect(c)
-        if ( (x,y)!=(0,0) )&(not contientDeja(center_tab, x, y)):
-                                                        #(155+(i*50)) -> du etre changer sinon contour compter comme motif pour mask[2] -> ? n'est pas sensé appliqué le mask sur une image comportnat des contours
-            cv.rectangle(img, (x, y), (x + w, y + h), (171+(motif*42), 0, 0), 2)
-            center_tab.append((x,y,motif)) #motif in {"rond", "trait", "cercle"}
-            #print ((x,y,motif))
+        if cv.contourArea(c) <= limit_area:
+            continue
+
+        # Calculer les moments du contour
+        M = cv.moments(c)
+
+        # Vérifier si le moment est valide (éviter la division par zéro)
+        if M["m00"] != 0:
+            # Calculer les coordonnées du centroïde (centre)
+            cX = int(M["m10"] / M["m00"])
+            cY = int(M["m01"] / M["m00"])
+
+            if not contientDeja(center_tab, cX, cY):  # Vérifier si le centre existe déjà
+                center_tab.append((cX, cY, motif))  # Ajouter les coordonnées du centre et le motif
+        
+            #x, y, w, h = cv.boundingRect(c) # À enlever
+            #if ((x, y) != (0, 0)) & (not contientDeja(center_tab, x, y)): #À enlever
+            #    cv.rectangle(img, (x, y), (x + w, y + h), (171 + (motif * 42), 0, 0), 2) #À enlever
+            #    center_tab.append((x, y, motif))  # motif in {"rond", "trait", "cercle"} #À enlever
     
 def angleRedPattern(img):
     """

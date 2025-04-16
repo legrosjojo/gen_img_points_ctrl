@@ -1,3 +1,11 @@
+
+"""
+@file graph.py
+@brief This file defines the CustomGUI class, which creates a graphical user interface (GUI) for image processing.
+@details The GUI allows users to adjust image transformation parameters, view the transformed image,
+         and control data saving options. It uses the customtkinter library for the GUI and OpenCV for image processing.
+"""
+
 import sys
 import os
 import math
@@ -13,17 +21,25 @@ customtkinter.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark",
 customtkinter.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
 class CustomGUI(customtkinter.CTk):
+    """
+    @brief A custom GUI for image processing with sliders, checkboxes, and image display.
+
+    @details This class creates a GUI using customtkinter for adjusting image transformation parameters,
+             displaying the transformed image, and controlling data saving options.
+    """
     def __init__(self):
         """
-        Initializes the CustomGUI class, setting up the main window, frames, sliders, and checkboxes.
+        @brief Initializes the CustomGUI class, setting up the main window, frames, sliders, and checkboxes.
 
-        Args:
-            None
+        @details Sets up the main window with a title and geometry, creates frames for different GUI elements,
+                 initializes sliders for variable selection, creates checkboxes for data options,
+                 loads the initial image, and adds a validation button to trigger processing.
 
-        Returns:
-            None
+        @param None
 
-        Notes:
+        @return None
+
+        @note
             - Sets up the main window with a title and geometry.
             - Creates frames for the title, variable selection, image display, and checkboxes.
             - Initializes sliders for variable selection.
@@ -103,15 +119,15 @@ class CustomGUI(customtkinter.CTk):
 
     def create_sliders(self):
         """
-        Creates sliders for variable selection.
+        @brief Creates sliders for variable selection.
 
-        Args:
-            None
+        @details Creates sliders for translation and rotation variables, pairing each slider with an entry field for manual input.
 
-        Returns:
-            None
+        @param None
 
-        Notes:
+        @return None
+
+        @note
             - Creates sliders for translation and rotation variables.
             - Each slider is paired with an entry field for manual input.
         """
@@ -149,15 +165,15 @@ class CustomGUI(customtkinter.CTk):
 
     def update_slider_value(self, value):
         """
-        Updates the entry fields with the current slider values.
+        @brief Updates the entry fields with the current slider values.
 
-        Args:
-            value (float): The current value of the slider.
+        @details Updates the entry field corresponding to each slider, then calls update_image to refresh the displayed image.
 
-        Returns:
-            None
+        @param value (float): The current value of the slider.
 
-        Notes:
+        @return None
+
+        @note
             - Updates the entry field corresponding to each slider.
             - Calls update_image to refresh the displayed image.
         """
@@ -167,15 +183,15 @@ class CustomGUI(customtkinter.CTk):
 
     def update_entry_value(self, label):
         """
-        Updates the slider values with the current entry field values.
+        @brief Updates the slider values with the current entry field values.
 
-        Args:
-            label (str): The label of the slider to update.
+        @details Updates the slider with the value from the corresponding entry field, then calls update_image to refresh the displayed image.
 
-        Returns:
-            None
+        @param label (str): The label of the slider to update.
 
-        Notes:
+        @return None
+
+        @note
             - Updates the slider with the value from the corresponding entry field.
             - Calls update_image to refresh the displayed image.
         """
@@ -188,15 +204,16 @@ class CustomGUI(customtkinter.CTk):
 
     def validate(self):
         """
-        Validates the current settings and triggers the main processing function.
+        @brief Validates the current settings and triggers the main processing function.
 
-        Args:
-            None
+        @details Updates the global variables with the current slider values, updates the global show_data and save_data
+                 variables with the checkbox values, calls the main function from code2, and minimizes the GUI window.
 
-        Returns:
-            None
+        @param None
 
-        Notes:
+        @return None
+
+        @note
             - Updates the global variables with the current slider values.
             - Updates the global show_data and save_data variables with the checkbox values.
             - Calls the main function from code2.
@@ -219,15 +236,15 @@ class CustomGUI(customtkinter.CTk):
 
     def load_image(self, path):
         """
-        Loads an image from the given path and displays it.
+        @brief Loads an image from the given path and displays it.
 
-        Args:
-            path (str): The path to the image file.
+        @details Loads the image using OpenCV, converts the image to RGB format, and calls update_image to display the image.
 
-        Returns:
-            None
+        @param path (str): The path to the image file.
 
-        Notes:
+        @return None
+
+        @note
             - Loads the image using OpenCV.
             - Converts the image to RGB format.
             - Calls update_image to display the image.
@@ -238,15 +255,16 @@ class CustomGUI(customtkinter.CTk):
 
     def update_image(self):
         """
-        Updates the displayed image with the current transformations.
+        @brief Updates the displayed image with the current transformations.
 
-        Args:
-            None
+        @details Applies the current transformations to the original image, converts the transformed image to a format
+                 compatible with Tkinter, and updates the image label with the new image.
 
-        Returns:
-            None
+        @param None
 
-        Notes:
+        @return None
+
+        @note
             - Applies the current transformations to the original image.
             - Converts the transformed image to a format compatible with Tkinter.
             - Updates the image label with the new image.
@@ -269,21 +287,22 @@ class CustomGUI(customtkinter.CTk):
 
     def apply_transformations(self, image, t_x, t_y, t_z, r_x, r_y, r_z):
         """
-        Applies the current transformations to the given image.
+        @brief Applies the current transformations to the given image.
 
-        Args:
-            image (numpy.ndarray): The image to transform.
-            t_x (float): Translation along the X-axis.
-            t_y (float): Translation along the Y-axis.
-            t_z (float): Translation along the Z-axis.
-            r_x (float): Rotation around the X-axis.
-            r_y (float): Rotation around the Y-axis.
-            r_z (float): Rotation around the Z-axis.
+        @details Creates a transformation matrix using the current translation and rotation values,
+                 and applies the transformation matrix to the image using warpPerspective.
 
-        Returns:
-            numpy.ndarray: The transformed image.
+        @param image (numpy.ndarray): The image to transform.
+        @param t_x (float): Translation along the X-axis.
+        @param t_y (float): Translation along the Y-axis.
+        @param t_z (float): Translation along the Z-axis.
+        @param r_x (float): Rotation around the X-axis.
+        @param r_y (float): Rotation around the Y-axis.
+        @param r_z (float): Rotation around the Z-axis.
 
-        Notes:
+        @return numpy.ndarray: The transformed image.
+
+        @note
             - Creates a transformation matrix using the current translation and rotation values.
             - Applies the transformation matrix to the image using warpPerspective.
         """
@@ -302,15 +321,16 @@ class CustomGUI(customtkinter.CTk):
 
     def convert_cv_to_ctk(self, cv_image):
         """
-        Converts an OpenCV image to a format compatible with Tkinter.
+        @brief Converts an OpenCV image to a format compatible with Tkinter.
 
-        Args:
-            cv_image (numpy.ndarray): The image to convert.
+        @details Converts the image from BGR to RGB format, creates a PIL Image from the converted image,
+                 and returns a CTkImage object that can be displayed in a Tkinter widget.
 
-        Returns:
-            customtkinter.CTkImage: The converted image.
+        @param cv_image (numpy.ndarray): The image to convert.
 
-        Notes:
+        @return customtkinter.CTkImage: The converted image.
+
+        @note
             - Converts the image from BGR to RGB format.
             - Creates a PIL Image from the converted image.
             - Returns a CTkImage object that can be displayed in a Tkinter widget.
