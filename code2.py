@@ -49,12 +49,12 @@ t_y = 0
 
 ## @var t_z
 #  Translation along the Z-axis.
-t_z = 10
+t_z = 20
 
 # Rotation
 ## @var r_x
 #  Rotation around the X-axis.
-r_x = 10
+r_x = 20
 
 ## @var r_y
 #  Rotation around the Y-axis.
@@ -62,7 +62,7 @@ r_y = 0
 
 ## @var r_z
 #  Rotation around the Z-axis.
-r_z = 15
+r_z = 46
 
 ## @var bool_rxy
 #  Determines the rotation order 'xy' or 'yx' when both r_x and r_y are used.
