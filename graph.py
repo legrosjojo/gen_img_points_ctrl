@@ -207,17 +207,11 @@ class CustomGUI(customtkinter.CTk):
         @brief Validates the current settings and triggers the main processing function.
 
         @details Updates the global variables with the current slider values, updates the global show_data and save_data
-                 variables with the checkbox values, calls the main function from code2, and minimizes the GUI window.
+                variables with the checkbox values, calls the main function from code2, and exits the application.
 
         @param None
 
         @return None
-
-        @note
-            - Updates the global variables with the current slider values.
-            - Updates the global show_data and save_data variables with the checkbox values.
-            - Calls the main function from code2.
-            - Closes the GUI window.
         """
         # Update the global variables with slider values
         code2.t_x = self.sliders["Translation X"].get()
@@ -227,12 +221,17 @@ class CustomGUI(customtkinter.CTk):
         code2.r_y = self.sliders["Rotation Y"].get()
         code2.r_z = self.sliders["Rotation Z"].get()
 
+        # Update checkboxes
         code2.show_data = [var.get() for var in self.show_data_vars]
         code2.save_data = [var.get() for var in self.save_data_vars]
 
-        # Call the main function
+        # Call the main processing function
         code2.main()
-        self.iconify()
+
+        # Quit the application completely
+        self.destroy()
+        sys.exit()
+
 
     def load_image(self, path):
         """

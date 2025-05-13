@@ -543,7 +543,6 @@ def findContours(img, motif=None):
         method=cv.CHAIN_APPROX_SIMPLE,
         offset=(0, 0)
     )  # RETR_LIST,
-
     for c in contours:
         if cv.contourArea(c) <= limit_area:
             continue
@@ -666,7 +665,8 @@ def fullContoursProcess(img):
             cv.imshow("thresh"+str(i), img_thresh)
         if save_data[6]:
             cv.imwrite("data/thresh"+str(i)+".png", img_thresh)
-        findContours(img_thresh, i)
+        findContours2(img_thresh, i)
+
 
 
 def find_pixel_dir(img, start_x, start_y, dir, target_color):
@@ -794,5 +794,7 @@ def main():
                 file.write(f"{k}: {v}\n")
 
     cv.waitKey(0)
+
+main()
 
 #libcamera pour
