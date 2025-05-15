@@ -1,990 +1,144 @@
+# Nouveau search2.py : version simplifiée avec une seule base_mire
+
 import cv2 as cv
 import numpy as np
 import code2
 import math
-import matplotlib.pyplot as plt
-import random
 
 # === PARAMÈTRES ===
-image_original_path = "mire_315a.png"
-image_transformed_path = "data/trans.png"
-distance_init = 5  # Distance de départ
-step_size = 5      # Pas d'augmentation de la distance
-angle_tolerance = 45  # Tolérance angulaire en degrés
-max_distance = 50  # Limite maximale de recherche
+distance_init = 5
+step_size = 5
+max_distance = 100
 
-# === TABLEAU DE DONNEES ===
-motifs_data = []  # Liste pour stocker les résultats
-# Définir les listes pour les différentes orientations
-base_mire_0 = [
-('(255, 255)', '120121210'),
-('(287, 255)', '102112220'),
-('(255, 287)', '212011100'),
-('(223, 255)', '102022112'),
-('(255, 223)', '111201021'),
-('(287, 287)', '001211202'),
-('(223, 287)', '021201121'),
-('(287, 223)', '211110122'),
-('(223, 223)', '210210111'),
-('(255, 319)', '121202002'),
-('(319, 255)', '200122102'),
-('(191, 255)', '021102210'),
-('(255, 191)', '112002002'),
-('(287, 319)', '022120020'),
-('(319, 287)', '020012022'),
-('(223, 319)', '211120212'),
-('(319, 223)', '221201210'),
-('(287, 191)', '021120112'),
-('(191, 287)', '211110102'),
-('(223, 191)', '022110211'),
-('(191, 223)', '201001021'),
-('(319, 319)', '202000222'),
-('(191, 319)', '110112021'),
-('(319, 191)', '122001121'),
-('(191, 191)', '120021002'),
-('(351, 255)', '020221011'),
-('(255, 351)', '212121022'),
-('(159, 255)', '110210202'),
-('(255, 159)', '210012000'),
-('(287, 351)', '221210202'),
-('(351, 287)', '222020112'),
-('(223, 351)', '121112121'),
-('(351, 223)', '102212001'),
-('(287, 159)', '001220011'),
-('(159, 287)', '111021021'),
-('(159, 223)', '012120120'),
-('(223, 159)', '001121221'),
-('(319, 351)', '022202221'),
-('(351, 319)', '220202121'),
-('(191, 351)', '112011212'),
-('(351, 191)', '212111200'),
-('(159, 319)', '100101211'),
-('(319, 159)', '110000012'),
-('(159, 191)', '001212112'),
-('(191, 159)', '110222100'),
-('(255, 383)', '100212220'),
-('(383, 255)', '112010100'),
-('(127, 255)', '200011011'),
-('(255, 127)', '220100200'),
-('(383, 287)', '122201001'),
-('(287, 383)', '200122022'),
-('(383, 223)', '010120010'),
-('(223, 383)', '202111210'),
-('(127, 287)', '012002111'),
-('(287, 127)', '002202201'),
-('(127, 223)', '120122001'),
-('(223, 127)', '101200022'),
-('(351, 351)', '212022211'),
-('(159, 351)', '021011111'),
-('(351, 159)', '121100220'),
-('(159, 159)', '202122211'),
-('(319, 383)', '220220211'),
-('(383, 319)', '212221012'),
-('(383, 191)', '001212101'),
-('(191, 383)', '121201120'),
-('(319, 127)', '010022201'),
-('(127, 319)', '102200110'),
-('(127, 191)', '211221200'),
-('(191, 127)', '212210010'),
-('(351, 383)', '112202111'),
-('(383, 351)', '111222121'),
-('(255, 415)', '011021200'),
-('(415, 255)', '001101112'),
-('(159, 383)', '210100112'),
-('(383, 159)', '202102110'),
-('(127, 351)', '010221102'),
-('(351, 127)', '011022022'),
-('(95, 255)', '001021120'),
-('(255, 95)', '021001120'),
-('(127, 159)', '122212220'),
-('(159, 127)', '221201021'),
-('(287, 415)', '001012221'),
-('(415, 287)', '012110122'),
-('(223, 415)', '012212101'),
-('(415, 223)', '101000111'),
-('(95, 287)', '022100201'),
-('(287, 95)', '202011220'),
-('(223, 95)', '012010102'),
-('(95, 223)', '100212212'),
-('(415, 319)', '121210220'),
-('(319, 415)', '210022110'),
-('(415, 191)', '010021011'),
-('(191, 415)', '221121201'),
-('(95, 319)', '222210010'),
-('(319, 95)', '200212020'),
-('(191, 95)', '022111001'),
-('(95, 191)', '212112121'),
-('(383, 383)', '111121210'),
-('(127, 383)', '101020021'),
-('(383, 127)', '221020211'),
-('(127, 127)', '212100122'),
-('(351, 415)', '101221112'),
-('(415, 351)', '211121202'),
-('(159, 415)', '111012122'),
-('(415, 159)', '100221001'),
-('(95, 351)', '202222101'),
-('(351, 95)', '200220102'),
-('(159, 95)', '122011102'),
-('(95, 159)', '221121212'),
-('(255, 447)', '121100001'),
-('(447, 255)', '120011011'),
-('(63, 255)', '012102100'),
-('(255, 63)', '100010212'),
-('(287, 447)', '012100211'),
-('(447, 287)', '221001110'),
-('(223, 447)', '110220012'),
-('(447, 223)', '110101001'),
-('(63, 287)', '122210002'),
-('(287, 63)', '120102222'),
-('(223, 63)', '000121010'),
-('(63, 223)', '201001210'),
-('(319, 447)', '111002102'),
-('(447, 319)', '202102101'),
-('(447, 191)', '111010200'),
-('(191, 447)', '201112011'),
-('(63, 319)', '221221022'),
-('(319, 63)', '222122102'),
-('(383, 415)', '120111101'),
-('(415, 383)', '101112022'),
-('(63, 191)', '120011221'),
-('(191, 63)', '101112100'),
-('(127, 415)', '010101211'),
-('(415, 127)', '112202200'),
-('(95, 383)', '010222010'),
-('(383, 95)', '020201221'),
-('(127, 95)', '021001112'),
-('(95, 127)', '121210021'),
-('(351, 447)', '021121121'),
-('(447, 351)', '021212011'),
-('(447, 159)', '010110220'),
-('(159, 447)', '112101220'),
-('(351, 63)', '022221210'),
-('(63, 351)', '222122220'),
-('(63, 159)', '110112122'),
-('(159, 63)', '110101210'),
-('(415, 415)', '012111220'),
-('(95, 415)', '101020101'),
-('(415, 95)', '212012220'),
-('(95, 95)', '012100102'),
-('(383, 447)', '212011010'),
-('(447, 383)', '220120112'),
-('(447, 127)', '001122122'),
-('(127, 447)', '122010111'),
-('(383, 63)', '102012022'),
-('(63, 383)', '200212201'),
-('(127, 63)', '100020111'),
-('(63, 127)', '211101012'),
-('(415, 447)', '101210202'),
-('(447, 415)', '201012120'),
-('(95, 447)', '020101012'),
-('(447, 95)', '201222112'),
-('(63, 415)', '012022010'),
-('(415, 63)', '220120022'),
-('(95, 63)', '001022010'),
-('(63, 95)', '121020001'),
-('(447, 447)', '020102202'),
-('(63, 447)', '102200102'),
-('(447, 63)', '222200111'),
-('(63, 63)', '010212200')
-]
+motifs_data = []
 
-base_mire_90 = [
-    ('(256, 255)', '110201212'),
-('(256, 287)', '120021122'),
-('(288, 255)', '121112010'),
-('(224, 255)', '200120111'),
-('(256, 223)', '112020221'),
-('(224, 287)', '002012112'),
-('(288, 287)', '222111101'),
-('(224, 223)', '021212011'),
-('(288, 223)', '211102101'),
-('(256, 319)', '202001221'),
-('(320, 255)', '102120020'),
-('(192, 255)', '102212020'),
-('(256, 191)', '010211022'),
-('(224, 319)', '022200120'),
-('(288, 319)', '210212012'),
-('(320, 287)', '012211201'),
-('(192, 287)', '020221200'),
-('(320, 223)', '011221102'),
-('(192, 223)', '212111202'),
-('(288, 191)', '221010010'),
-('(224, 191)', '202111101'),
-('(320, 319)', '121220011'),
-('(192, 319)', '222020002'),
-('(320, 191)', '102200210'),
-('(192, 191)', '121101120'),
-('(256, 351)', '011202210'),
-('(352, 255)', '200100120'),
-('(160, 255)', '222121210'),
-('(256, 159)', '102102102'),
-('(288, 351)', '101022120'),
-('(224, 351)', '212220201'),
-('(352, 287)', '011012200'),
-('(160, 287)', '202212102'),
-('(352, 223)', '021011212'),
-('(160, 223)', '121211121'),
-('(288, 159)', '020121201'),
-('(224, 159)', '121110210'),
-('(320, 351)', '200121112'),
-('(192, 351)', '221202021'),
-('(160, 319)', '021222022'),
-('(352, 319)', '112100000'),
-('(352, 191)', '100102221'),
-('(160, 191)', '112120112'),
-('(320, 159)', '012012121'),
-('(192, 159)', '111001012'),
-('(256, 383)', '100120101'),
-('(128, 255)', '120002122'),
-('(384, 255)', '200201002'),
-('(256, 127)', '211000110'),
-('(288, 383)', '010101200'),
-('(224, 383)', '101222010'),
-('(384, 287)', '001022022'),
-('(128, 287)', '222001220'),
-('(384, 223)', '122012000'),
-('(128, 223)', '210021112'),
-('(224, 127)', '011120021'),
-('(288, 127)', '101201220'),
-('(352, 351)', '120211002'),
-('(160, 351)', '211120222'),
-('(160, 159)', '011210111'),
-('(352, 159)', '211021222'),
-('(320, 383)', '001012121'),
-('(192, 383)', '212122210'),
-('(384, 319)', '001100222'),
-('(128, 319)', '211202202'),
-('(128, 191)', '120212011'),
-('(384, 191)', '210122100'),
-('(192, 127)', '110022001'),
-('(320, 127)', '200112212'),
-('(256, 415)', '012011011'),
-('(160, 383)', '121112221'),
-('(352, 383)', '210021021'),
-('(384, 351)', '022110220'),
-('(128, 351)', '111122021'),
-('(416, 255)', '020210011'),
-('(96, 255)', '000110212'),
-('(384, 159)', '221212010'),
-('(128, 159)', '212101001'),
-('(160, 127)', '002102211'),
-('(352, 127)', '120222122'),
-('(256, 95)', '020010211'),
-('(224, 415)', '022121101'),
-('(288, 415)', '111010001'),
-('(96, 287)', '021010122'),
-('(416, 287)', '220020112'),
-('(416, 223)', '002120101'),
-('(96, 223)', '001122121'),
-('(224, 95)', '001221002'),
-('(288, 95)', '112002122'),
-('(320, 415)', '011100210'),
-('(192, 415)', '120212102'),
-('(416, 319)', '220002120'),
-('(96, 319)', '210100221'),
-('(416, 191)', '001221110'),
-('(96, 191)', '201211212'),
-('(320, 95)', '221121121'),
-('(192, 95)', '210222100'),
-('(128, 383)', '110111212'),
-('(384, 383)', '211210202'),
-('(128, 127)', '121010200'),
-('(384, 127)', '222121001'),
-('(352, 415)', '101002210'),
-('(160, 415)', '202111212'),
-('(96, 351)', '112012211'),
-('(416, 351)', '202002201'),
-('(416, 159)', '102220111'),
-('(96, 159)', '122110121'),
-('(352, 95)', '212211212'),
-('(160, 95)', '201022221'),
-('(256, 447)', '111200110'),
-('(448, 255)', '112000102'),
-('(64, 255)', '101211000'),
-('(256, 63)', '000121021'),
-('(288, 447)', '101101010'),
-('(224, 447)', '210210011'),
-('(64, 287)', '011121002'),
-('(448, 287)', '122201022'),
-('(448, 223)', '010001210'),
-('(64, 223)', '112102200'),
-('(224, 63)', '102222100'),
-('(288, 63)', '210010012'),
-('(320, 447)', '100110102'),
-('(192, 447)', '201021021'),
-('(64, 319)', '102110021'),
-('(448, 319)', '202221221'),
-('(448, 191)', '100011121'),
-('(64, 191)', '211011120'),
-('(320, 63)', '121200112'),
-('(192, 63)', '222212210'),
-('(384, 415)', '100122022'),
-('(128, 415)', '122011120'),
-('(416, 383)', '021202012'),
-('(96, 383)', '101201111'),
-('(416, 127)', '012210011'),
-('(96, 127)', '011101012'),
-('(128, 95)', '010102220'),
-('(384, 95)', '121212100'),
-('(352, 447)', '020101102'),
-('(160, 447)', '011212120'),
-('(448, 351)', '010222212'),
-('(64, 351)', '021211211'),
-('(448, 159)', '110101012'),
-('(64, 159)', '120121012'),
-('(352, 63)', '122101121'),
-('(160, 63)', '220221222'),
-('(96, 415)', '020121112'),
-('(416, 415)', '220120122'),
-('(416, 95)', '002121001'),
-('(96, 95)', '101010201'),
-('(384, 447)', '022011221'),
-('(128, 447)', '212201201'),
-('(448, 383)', '122020120'),
-('(64, 383)', '210120110'),
-('(448, 127)', '111000201'),
-('(64, 127)', '111220101'),
-('(384, 63)', '212111010'),
-('(128, 63)', '201002122'),
-('(416, 447)', '212012221'),
-('(96, 447)', '220010121'),
-('(64, 415)', '102012102'),
-('(448, 415)', '222201200'),
-('(448, 95)', '010010220'),
-('(64, 95)', '012201010'),
-('(96, 63)', '010120220'),
-('(416, 63)', '101210200'),
-('(64, 447)', '002201022'),
-('(448, 447)', '211222001'),
-('(448, 63)', '000102122'),
-('(64, 63)', '102022001')
-]
-
-base_mire_180 = [
-    ('(256, 256)', '112102012'),
-('(256, 288)', '110211120'),
-('(288, 256)', '121120202'),
-('(224, 256)', '122200211'),
-('(256, 224)', '211001201'),
-('(288, 224)', '011212120'),
-('(224, 224)', '012020121'),
-('(288, 288)', '201111021'),
-('(224, 288)', '201221111'),
-('(320, 256)', '022102110'),
-('(256, 320)', '120021200'),
-('(256, 192)', '120022120'),
-('(192, 256)', '221020012'),
-('(288, 320)', '002112211'),
-('(224, 320)', '001122112'),
-('(192, 224)', '020222001'),
-('(224, 192)', '000202212'),
-('(320, 288)', '210210100'),
-('(192, 288)', '212102120'),
-('(320, 224)', '201021111'),
-('(288, 192)', '202121112'),
-('(320, 320)', '110022002'),
-('(192, 320)', '111212200'),
-('(320, 192)', '120211011'),
-('(192, 192)', '202220200'),
-('(160, 256)', '010112022'),
-('(352, 256)', '102021021'),
-('(256, 352)', '220001001'),
-('(256, 160)', '210221212'),
-('(288, 352)', '012210112'),
-('(224, 352)', '000110122'),
-('(352, 288)', '001201212'),
-('(160, 288)', '120010221'),
-('(352, 224)', '110211102'),
-('(288, 160)', '121212111'),
-('(160, 224)', '201122202'),
-('(224, 160)', '202022121'),
-('(352, 320)', '021120121'),
-('(192, 160)', '022212220'),
-('(320, 352)', '121001022'),
-('(192, 352)', '100121000'),
-('(352, 192)', '112110010'),
-('(320, 160)', '112121201'),
-('(160, 320)', '212001211'),
-('(160, 192)', '221212020'),
-('(128, 256)', '101001201'),
-('(256, 128)', '122200021'),
-('(256, 384)', '202002010'),
-('(384, 256)', '210110001'),
-('(224, 384)', '022010220'),
-('(128, 288)', '000101012'),
-('(384, 224)', '021111200'),
-('(288, 384)', '100220120'),
-('(384, 288)', '120012012'),
-('(128, 224)', '110012220'),
-('(288, 128)', '212100211'),
-('(224, 128)', '220220012'),
-('(352, 160)', '011112101'),
-('(160, 352)', '102202110'),
-('(352, 352)', '222110212'),
-('(160, 160)', '222111202'),
-('(192, 384)', '022011002'),
-('(128, 320)', '021010121'),
-('(384, 192)', '101100220'),
-('(320, 128)', '111202120'),
-('(320, 384)', '200101221'),
-('(384, 320)', '212001122'),
-('(128, 192)', '210121222'),
-('(192, 128)', '202112022'),
-('(256, 416)', '011202100'),
-('(160, 384)', '020221102'),
-('(416, 256)', '011200102'),
-('(96, 256)', '011120110'),
-('(384, 160)', '011021022'),
-('(256, 96)', '012001102'),
-('(384, 352)', '122202221'),
-('(128, 160)', '121211122'),
-('(160, 128)', '121111220'),
-('(352, 384)', '210212120'),
-('(128, 352)', '221100210'),
-('(352, 128)', '201121010'),
-('(288, 416)', '001021201'),
-('(416, 224)', '002012210'),
-('(96, 224)', '001221211'),
-('(288, 96)', '021011221'),
-('(224, 96)', '022210101'),
-('(416, 288)', '122120021'),
-('(96, 288)', '101110100'),
-('(224, 416)', '212200201'),
-('(320, 416)', '010012211'),
-('(96, 320)', '010111002'),
-('(96, 192)', '102202121'),
-('(192, 416)', '220200021'),
-('(416, 320)', '221211211'),
-('(416, 192)', '200102221'),
-('(320, 96)', '212012112'),
-('(192, 96)', '221101002'),
-('(384, 128)', '100210102'),
-('(128, 128)', '112101112'),
-('(384, 384)', '201221210'),
-('(128, 384)', '202112102'),
-('(352, 416)', '111022201'),
-('(96, 352)', '110010022'),
-('(352, 96)', '121221101'),
-('(160, 96)', '111120122'),
-('(160, 416)', '201020022'),
-('(416, 352)', '212122112'),
-('(416, 160)', '221010222'),
-('(96, 160)', '212021112'),
-('(448, 256)', '021001210'),
-('(256, 448)', '102120001'),
-('(64, 256)', '110112001'),
-('(256, 64)', '100012110'),
-('(288, 448)', '010100012'),
-('(224, 64)', '002111210'),
-('(224, 448)', '122222010'),
-('(64, 288)', '110011010'),
-('(448, 224)', '100022221'),
-('(288, 64)', '100121022'),
-('(448, 288)', '212100100'),
-('(64, 224)', '211102100'),
-('(320, 448)', '121000111'),
-('(448, 320)', '112212001'),
-('(64, 320)', '102001101'),
-('(192, 64)', '121021100'),
-('(192, 448)', '221022212'),
-('(448, 192)', '210222122'),
-('(64, 192)', '221010210'),
-('(320, 64)', '220110111'),
-('(384, 416)', '011122100'),
-('(128, 416)', '012212020'),
-('(416, 128)', '020101022'),
-('(384, 96)', '012111010'),
-('(416, 384)', '100212121'),
-('(96, 384)', '122001220'),
-('(96, 128)', '120220111'),
-('(128, 96)', '111012011'),
-('(160, 448)', '012102222'),
-('(64, 352)', '002201011'),
-('(64, 160)', '020112121'),
-('(160, 64)', '011212112'),
-('(352, 448)', '112101010'),
-('(448, 352)', '121221011'),
-('(352, 64)', '112201210'),
-('(448, 160)', '222202212'),
-('(416, 416)', '001021210'),
-('(96, 96)', '012201211'),
-('(416, 96)', '101010102'),
-('(96, 416)', '222201201'),
-('(64, 384)', '021220112'),
-('(384, 448)', '101110002'),
-('(128, 448)', '120220201'),
-('(384, 64)', '101112201'),
-('(448, 384)', '210121110'),
-('(448, 128)', '222010021'),
-('(64, 128)', '201122012'),
-('(128, 64)', '210101201'),
-('(416, 448)', '020100102'),
-('(448, 96)', '020101202'),
-('(416, 64)', '010122010'),
-('(448, 416)', '100012102'),
-('(96, 64)', '102020121'),
-('(96, 448)', '200222012'),
-('(64, 416)', '221120122'),
-('(64, 96)', '221200101'),
-('(448, 448)', '022001021'),
-('(64, 64)', '022022010'),
-('(448, 64)', '101020220'),
-('(64, 448)', '201112220')
-]
-
-base_mire_270 = [
-('(255, 256)', '112121020'),
-('(287, 256)', '201110012'),
-('(255, 288)', '102211202'),
-('(255, 224)', '111222002'),
-('(223, 256)', '120102111'),
-('(287, 288)', '020112121'),
-('(287, 224)', '021120201'),
-('(223, 288)', '221011110'),
-('(223, 224)', '211012211'),
-('(319, 256)', '120200221'),
-('(255, 320)', '010221021'),
-('(255, 192)', '212210200'),
-('(191, 256)', '100200212'),
-('(319, 224)', '012002022'),
-('(319, 288)', '212021211'),
-('(287, 192)', '001202220'),
-('(287, 320)', '211010211'),
-('(223, 320)', '200102101'),
-('(223, 192)', '220121021'),
-('(191, 288)', '011021122'),
-('(191, 224)', '012011221'),
-('(319, 320)', '111202110'),
-('(319, 192)', '200022202'),
-('(191, 320)', '102100220'),
-('(191, 192)', '100112122'),
-('(351, 256)', '212102212'),
-('(255, 160)', '022101120'),
-('(255, 352)', '121020210'),
-('(159, 256)', '201200010'),
-('(351, 288)', '111212121'),
-('(351, 224)', '221020221'),
-('(287, 352)', '102102111'),
-('(287, 160)', '202011222'),
-('(223, 352)', '012012012'),
-('(223, 160)', '121200102'),
-('(159, 288)', '012122101'),
-('(159, 224)', '022001101'),
-('(351, 192)', '020222122'),
-('(351, 320)', '101121212'),
-('(319, 352)', '110121100'),
-('(319, 160)', '220212120'),
-('(191, 352)', '021211201'),
-('(191, 160)', '211120012'),
-('(159, 320)', '122210010'),
-('(159, 192)', '100001210'),
-('(383, 256)', '121222000'),
-('(255, 128)', '101010012'),
-('(255, 384)', '201101100'),
-('(127, 256)', '210020020'),
-('(383, 288)', '211121002'),
-('(383, 224)', '212202200'),
-('(287, 384)', '000211112'),
-('(287, 128)', '120100122'),
-('(223, 128)', '012001010'),
-('(223, 384)', '112200120'),
-('(127, 224)', '020220102'),
-('(127, 288)', '120002201'),
-('(351, 352)', '001111121'),
-('(351, 160)', '202221112'),
-('(159, 160)', '110022021'),
-('(159, 352)', '212221102'),
-('(383, 320)', '120112021'),
-('(383, 192)', '222021120'),
-('(319, 384)', '120011002'),
-('(319, 128)', '222101212'),
-('(191, 128)', '021210101'),
-('(191, 384)', '222120011'),
-('(127, 192)', '002220110'),
-('(127, 320)', '221001012'),
-('(415, 256)', '002120011'),
-('(383, 160)', '120211112'),
-('(383, 352)', '210011210'),
-('(351, 384)', '022110210'),
-('(351, 128)', '122212111'),
-('(255, 416)', '002112001'),
-('(255, 96)', '010111201'),
-('(159, 384)', '121222022'),
-('(159, 128)', '210211002'),
-('(127, 160)', '002202211'),
-('(127, 352)', '220102121'),
-('(95, 256)', '000112021'),
-('(415, 288)', '021210112'),
-('(415, 224)', '001222101'),
-('(287, 416)', '010020122'),
-('(287, 96)', '011012212'),
-('(223, 416)', '121221200'),
-('(223, 96)', '100011101'),
-('(95, 288)', '001010212'),
-('(95, 224)', '201122002'),
-('(415, 320)', '212120121'),
-('(415, 192)', '202211010'),
-('(319, 96)', '121022021'),
-('(319, 416)', '221001022'),
-('(191, 96)', '002101110'),
-('(191, 416)', '211212112'),
-('(95, 320)', '011100122'),
-('(95, 192)', '221202000'),
-('(383, 384)', '102002101'),
-('(383, 128)', '112121011'),
-('(127, 384)', '210012212'),
-('(127, 128)', '202021121'),
-('(415, 352)', '101212211'),
-('(415, 160)', '122111201'),
-('(351, 416)', '222210102'),
-('(351, 96)', '212120211'),
-('(159, 96)', '122100100'),
-('(159, 416)', '212121221'),
-('(95, 352)', '101110222'),
-('(95, 160)', '222010200'),
-('(447, 256)', '110000121'),
-('(255, 448)', '010210012'),
-('(255, 64)', '101101120'),
-('(63, 256)', '101021200'),
-('(447, 224)', '010021112'),
-('(447, 288)', '122001210'),
-('(287, 448)', '121000222'),
-('(287, 64)', '200111021'),
-('(223, 64)', '110100110'),
-('(223, 448)', '200121001'),
-('(63, 288)', '012101000'),
-('(63, 224)', '110222220'),
-('(447, 192)', '100210211'),
-('(447, 320)', '211201101'),
-('(319, 448)', '222102221'),
-('(319, 64)', '210210102'),
-('(191, 448)', '101122120'),
-('(191, 64)', '101020011'),
-('(63, 320)', '111210001'),
-('(63, 192)', '212210222'),
-('(415, 384)', '010121110'),
-('(415, 128)', '111110120'),
-('(383, 416)', '022201010'),
-('(383, 96)', '111202201'),
-('(127, 416)', '121002121'),
-('(127, 96)', '120220012'),
-('(95, 384)', '000111221'),
-('(95, 128)', '020122120'),
-('(447, 160)', '012112121'),
-('(447, 352)', '110122012'),
-('(351, 64)', '021201121'),
-('(351, 448)', '212222022'),
-('(159, 64)', '011022010'),
-('(159, 448)', '111212210'),
-('(63, 160)', '022121022'),
-('(63, 352)', '110121010'),
-('(415, 96)', '011122012'),
-('(415, 416)', '102010101'),
-('(95, 416)', '010010212'),
-('(95, 96)', '201222012'),
-('(447, 384)', '101011122'),
-('(447, 128)', '201101012'),
-('(383, 448)', '221220100'),
-('(383, 64)', '212011220'),
-('(127, 64)', '012212201'),
-('(127, 448)', '210101211'),
-('(63, 384)', '102011100'),
-('(63, 128)', '101202202'),
-('(447, 416)', '010101220'),
-('(447, 96)', '121020201'),
-('(415, 448)', '002201012'),
-('(415, 64)', '201212001'),
-('(95, 448)', '102000121'),
-('(95, 64)', '222211201'),
-('(63, 416)', '002201001'),
-('(63, 96)', '212002220'),
-('(447, 64)', '010220220'),
-('(447, 448)', '120010202'),
-('(63, 448)', '021220010'),
-('(63, 64)', '220011122')
-]
-
-# === CHARGER IMAGES ===
-img_original = cv.imread(image_original_path)
-img_transformed = cv.imread(image_transformed_path)
-
-if img_original is None or img_transformed is None:
-    print("Erreur de chargement d'image.")
-    exit()
-
-# === DÉTECTER MOTIFS ORIGINAUX ===
-code2.center_tab = []
-code2.transformed_mire = img_original
-code2.fullContoursProcess(code2.transformed_mire)
-center_tab_original = code2.center_tab.copy()
-
-# === ESTIMER DISTANCE RÉFÉRENCE ===
-def estimate_average_distance(center_tab):
-    distances = []
-    for i in range(len(center_tab)):
-        for j in range(i + 1, len(center_tab)):
-            x1, y1, _ = center_tab[i]
-            x2, y2, _ = center_tab[j]
-            distance = math.hypot(x1 - x2, y1 - y2)
-            distances.append(distance)
-    return sum(distances) / len(distances) if distances else 0
-
-d_ref = estimate_average_distance(center_tab_original)
-
-# === DÉTECTER MOTIFS TRANSFORMÉS ===
-code2.center_tab = []
-code2.transformed_mire = img_transformed
-code2.fullContoursProcess(code2.transformed_mire)
-center_tab_transformed = code2.center_tab.copy()
-
-# === ANGLE DE DÉPART ===
-starting_angle = code2.angleRedPattern(img_transformed)
-print(f"Angle de départ : {starting_angle}")
-
-# === TROUVER CENTRE IMAGE ===
-image_height, image_width = img_transformed.shape[:2]
-center_x = image_width // 2
-center_y = image_height // 2
-
-# Trouver motif le plus proche du centre
-def find_central_motif(center_tab, center_x, center_y):
-    min_dist = float('inf')
-    best_index = None
-    for idx, (x, y, _) in enumerate(center_tab):
-        dist = math.hypot(x - center_x, y - center_y)
-        if dist < min_dist:
-            min_dist = dist
-            best_index = idx
-    return best_index
-
-motif_index_central = find_central_motif(center_tab_transformed, center_x, center_y)
-
-# === RECHERCHE VOISINS (optimisée avec distance progressive) ===
-def find_neighbor(img, center_tab, cx, cy, angle, angle_tol, init_dist, step_size, max_dist):
-    image_height, image_width = img.shape[:2]
+# === Fonction globale : Recherche de voisin ===
+def find_neighbor(center_tab, cx, cy, angle, init_dist=5, step_size=5, max_dist=100):
     angle_rad = math.radians(angle)
-
     d = init_dist
     while d <= max_dist:
         approx_x = cx + d * math.cos(angle_rad)
         approx_y = cy + d * math.sin(angle_rad)
-
-        if not (0 <= approx_x < image_width and 0 <= approx_y < image_height):  # Hors limites de l'image
-            break
-
         for (x, y, motif_type) in center_tab:
             if (x, y) == (cx, cy):
                 continue
-            distance = math.hypot(x - approx_x, y - approx_y)
-            if distance < step_size:  # Tolérance sur la position
-                return motif_type, (x, y), d
-
+            if math.hypot(x - approx_x, y - approx_y) < step_size:
+                return motif_type
         d += step_size
+    return "N"
 
-    return None, None, None
-
-# === PROCESS MOTIF ===
-def process_motif(img, img_copy, center_tab, index, angle_tol, start_angle):
+# === Fonction globale : Codage d'un motif ===
+def process_motif(center_tab, index, start_angle):
     motif_x, motif_y, motif_type = center_tab[index]
-    neighbor_types = []
-    found_distances = []  # Liste pour stocker les distances des voisins trouvés
+    neighbors = []
+    for i in range(8):
+        angle = (i * 45 + start_angle) % 360
+        neighbors.append(find_neighbor(center_tab, motif_x, motif_y, angle, distance_init, step_size, max_distance))
+    code = str(motif_type) + ''.join(str(n) for n in neighbors)
+    return (f"({int(motif_x)}, {int(motif_y)})", code)
 
-    cv.circle(img_copy, (int(motif_x), int(motif_y)), 5, (255, 0, 0), -1)  # Bleu (centre)
-    #cv.imshow("Image", img_copy)
-    #print(f"Motif central: {(motif_x, motif_y)}, Type: {motif_type}")
+# === Fonction : Génération de la base mire ===
+def generate_base_mire(image, start_angle=0):
+    code2.center_tab = []
+    code2.transformed_mire = image
+    code2.fullContoursProcess(image)
+    center_tab = code2.center_tab.copy()
 
-    # Trouver la distance optimale en fonction des voisins
-    search_distance = distance_init
-    while True:
-        neighbor_types.clear()
-        for i in range(8):
-            angle = (i * 45 + start_angle) % 360
-            neighbor_type, neighbor_coords, dist = find_neighbor(
-                img, center_tab, motif_x, motif_y, angle, angle_tol,
-                search_distance, step_size, max_distance
-            )
-
-            angle_rad = math.radians(angle)
-            approx_x = motif_x + search_distance * math.cos(angle_rad)
-            approx_y = motif_y + search_distance * math.sin(angle_rad)
-
-            if neighbor_type is not None:
-                #print(f"Voisin {i}: Type={neighbor_type}, Coords={neighbor_coords}, Distance={dist}")
-                cv.line(img_copy, (int(motif_x), int(motif_y)), (int(neighbor_coords[0]), int(neighbor_coords[1])), (0, 255, 0), 2)
-                cv.circle(img_copy, (int(neighbor_coords[0]), int(neighbor_coords[1])), 5, (0, 0, 255), -1)
-                neighbor_types.append(neighbor_type)
-                found_distances.append(dist)
-            else:
-                #print(f"Voisin {i}: Aucun voisin trouvé à l'angle {angle}")
-                cv.line(img_copy, (int(motif_x), int(motif_y)), (int(approx_x), int(approx_y)), (0, 0, 255), 2)
-
-            #cv.imshow("Image", img_copy)
-
-        # Si tous les voisins ont été trouvés et aucune distance "N" n'est présente
-        if len(neighbor_types) == 8 and "N" not in neighbor_types:
-            # Mettre à jour la distance maximale si des voisins ont été trouvés
-            if found_distances:
-                max_search_distance = 1.5 * max(found_distances)  # 1.5x de la distance maximale trouvée
-                #print(f"Distance maximale de recherche mise à jour à {max_search_distance}")
-                break
-
-        # Si aucune distance n'a été trouvée, passer à un autre motif
-        if len(neighbor_types) < 8:
-            #print(f"Aucun voisin trouvé pour ce motif à la distance maximale, on passe au suivant.")
-            break
-
-        search_distance += step_size
-
-    neighbor_code = str(motif_type) + "".join(str(n) for n in neighbor_types)
-    #print(f"Code de voisinage: {neighbor_code}")
-    #print("========================")
-
-    # Stockage des données (coordonnées, code de voisinage)
-    motif_data = (f"({motif_x}, {motif_y})", str(neighbor_code))
-    motifs_data.append(motif_data)  # Ajouter les données dans le tableau
-
-# === PROCESS ===
-img_copy = img_transformed.copy()
-
-# Traiter le motif central
-process_motif(img_transformed, img_copy, center_tab_transformed, motif_index_central, angle_tolerance, starting_angle)
-
-# Traiter les autres motifs en fonction de la proximité
-remaining_centers = center_tab_transformed[:]
-remaining_centers.pop(motif_index_central)  # Enlever le motif central de la liste
-
-# Trier les motifs par distance croissante par rapport au centre
-remaining_centers.sort(key=lambda motif: math.hypot(motif[0] - center_x, motif[1] - center_y))
-
-# Traiter les autres motifs
-for motif_x, motif_y, _ in remaining_centers:
-    motif_index = next(idx for idx, (x, y, _) in enumerate(center_tab_transformed) if (x, y) == (motif_x, motif_y))
-    process_motif(img_transformed, img_copy, center_tab_transformed, motif_index, angle_tolerance, starting_angle)
-
-cv.destroyAllWindows()
-
-def calculer_transformation(motifs_data, afficher_resultats=True):
-    motifs_data = [motif_data for motif_data in motifs_data if len(motif_data[1]) == 9]
-    print(f"Nombre de codes à 9 chiffres trouvés : {len(motifs_data)}")
-
-    mire_data_list = [
-        ("Mire 0°", base_mire_0),
-        ("Mire 90°", base_mire_90),
-        ("Mire 180°", base_mire_180),
-        ("Mire 270°", base_mire_270)
+    return [
+        (coord, code, '', '', '')
+        for coord, code in [process_motif(center_tab, i, start_angle) for i in range(len(center_tab))]
     ]
 
-    def check_code_in_mire(code, mire_data):
-        for _, val in mire_data:
-            if str(val) == str(code):
-                return True
-        return False
+# === Fonction : Ajout des codes tournés ===
+def add_rotated_codes(base_mire):
+    updated = []
+    for coord, code_0, _, _, _ in base_mire:
+        if len(code_0) != 9:
+            updated.append((coord, code_0, '', '', ''))
+            continue
+        M = code_0[0]
+        neighbors = code_0[1:]
+        code_90 = M + neighbors[2:] + neighbors[:2]
+        code_180 = M + neighbors[4:] + neighbors[:4]
+        code_270 = M + neighbors[6:] + neighbors[:6]
+        updated.append((coord, code_0, code_90, code_180, code_270))
+    return updated
 
-    def find_correspondances(motifs_data, mire_data_list):
-        mire_counts = {name: 0 for name, _ in mire_data_list}
-        for _, code in motifs_data:
-            for mire_name, mire_data in mire_data_list:
-                if check_code_in_mire(code, mire_data):
-                    mire_counts[mire_name] += 1
-        return mire_counts
+# === Code principal (à exécuter uniquement si le script est lancé directement) ===
+if __name__ == "__main__":
+    image_original_path = "mire_315a.png"
+    image_transformed_path = "data/trans.png"
 
-    mire_counts = find_correspondances(motifs_data, mire_data_list)
-    for mire_name, count in mire_counts.items():
-        print(f"{mire_name} : {count} correspondances")
-    best_mire_name = max(mire_counts, key=mire_counts.get)
-    print(f"Mire avec le plus de correspondances : {best_mire_name}")
-    best_mire_data = dict(mire_data_list)[best_mire_name]
+    img_original = cv.imread(image_original_path)
+    img_transformed = cv.imread(image_transformed_path)
 
-    mire_dict = {code: eval(coord) for coord, code in best_mire_data}
-    transformed_dict = {code: eval(coord) for coord, code in motifs_data}
+    if img_original is None or img_transformed is None:
+        raise ValueError("Erreur de chargement des images.")
 
-    common_codes = sorted(set(mire_dict.keys()) & set(transformed_dict.keys()))
-    print(f"Nombre de correspondances valides : {len(common_codes)}")
+    print("Génération de la base mire à partir de l'image originale...")
+    base_mire_raw = generate_base_mire(img_original, start_angle=0)
+    base_mire_complete = add_rotated_codes(base_mire_raw)
 
-    points_mire = [mire_dict[code] for code in common_codes]
-    points_transformed = [transformed_dict[code] for code in common_codes]
+    print("Détection des motifs dans l'image transformée...")
+    code2.center_tab = []
+    code2.transformed_mire = img_transformed
+    code2.fullContoursProcess(img_transformed)
+    center_tab_transformed = code2.center_tab.copy()
 
-    pts_mire = np.float32(points_mire)
-    pts_transformed = np.float32(points_transformed)
+    starting_angle = code2.angleRedPattern(img_transformed)
 
-    M_affine = M_projective = None
+    motifs_data = [process_motif(center_tab_transformed, i, starting_angle) for i in range(len(center_tab_transformed))]
 
-    if len(pts_mire) >= 3:
-        M_affine, _ = cv.estimateAffine2D(pts_mire, pts_transformed)
-        print("Matrice de transformation affine :\n", M_affine)
-    else:
-        print("Pas assez de points pour une transformation affine.")
+    print("Recherche de la meilleure orientation...")
+    lookup_dicts = {
+        "0": {code: coord for coord, code, _, _, _ in base_mire_complete},
+        "90": {code: coord for coord, _, code, _, _ in base_mire_complete},
+        "180": {code: coord for coord, _, _, code, _ in base_mire_complete},
+        "270": {code: coord for coord, _, _, _, code in base_mire_complete},
+    }
 
-    if len(pts_mire) >= 4:
-        M_projective, _ = cv.findHomography(pts_mire, pts_transformed)
-        print("Matrice de transformation projective :\n", M_projective)
-    else:
-        print("Pas assez de points pour une homographie.")
+    best_angle = None
+    best_lookup = None
+    best_count = 0
 
-    # Affichage des résultats avec OpenCV
-    if afficher_resultats and M_projective is not None:
-        pts_mire_homo = cv.convertPointsToHomogeneous(pts_mire).reshape(-1, 3).T  # (3, N)
-        pts_proj_homo = M_projective @ pts_mire_homo
-        pts_proj = (pts_proj_homo[:2] / pts_proj_homo[2]).T  # (N, 2)
+    for angle, lookup in lookup_dicts.items():
+        count = sum(1 for _, code in motifs_data if code in lookup)
+        print(f"Angle {angle}° : {count} correspondances")
+        if count > best_count:
+            best_angle = angle
+            best_lookup = lookup
+            best_count = count
 
-        errors = np.linalg.norm(pts_proj - pts_transformed, axis=1)
-        mean_error = np.mean(errors)
-        max_error = np.max(errors)
+    if best_lookup is None or best_count < 4:
+        raise RuntimeError("Pas assez de correspondances pour calculer la transformation.")
 
-        print(f"\nErreur moyenne (projective) : {mean_error:.2f} pixels")
-        print(f"Erreur maximale (projective) : {max_error:.2f} pixels")
+    print(f"Meilleure orientation : {best_angle}° avec {best_count} correspondances")
 
-        # Création de l'image de fond pour l'affichage
-        img_size = (500, 500)  # Dimension de l'image
-        img = np.ones(img_size, dtype=np.uint8) * 255  # Image blanche (fond)
+    points_transformed = []
+    points_reference = []
 
-        # Convertir les points en coordonnées dans l'image
-        pts_transformed = np.round(pts_transformed).astype(int)
-        pts_proj = np.round(pts_proj).astype(int)
+    for coords_str, code in motifs_data:
+        if code in best_lookup:
+            x_str, y_str = coords_str.strip('()').split(', ')
+            points_transformed.append((int(x_str), int(y_str)))
 
-        # Dessiner les points transformés et projetés sur l'image
-        for p in pts_transformed:
-            cv.circle(img, tuple(p), 5, (0, 0, 255), -1)  # Points transformés en rouge
+            coord_str = best_lookup[code]
+            x_ref, y_ref = coord_str.strip('()').split(', ')
+            points_reference.append((int(x_ref), int(y_ref)))
 
-        for p in pts_proj:
-            cv.circle(img, tuple(p), 5, (255, 0, 0), -1)  # Points projetés en bleu
+    pts_trans_np = np.array(points_transformed, dtype=np.float32)
+    pts_ref_np = np.array(points_reference, dtype=np.float32)
 
-        # Dessiner des lignes entre les paires de points correspondants
-        for p1, p2 in zip(pts_transformed, pts_proj):
-            cv.line(img, tuple(p1), tuple(p2), (0, 255, 0), 1)  # Lignes vertes
-
-        # Afficher l'image avec OpenCV
-        cv.imshow("Correspondances entre points transformés et projetés", img)
-        cv.waitKey(0)
-        cv.destroyAllWindows()
-
-    return M_affine, M_projective, best_mire_name, len(common_codes)
-
-def appliquer_transformation(img_transformed, M_affine, M_projective):
-    if M_affine is not None:
-        # Appliquer la transformation affine
-        img_recovered_affine = cv.warpAffine(img_transformed, M_affine, (img_transformed.shape[1], img_transformed.shape[0]))
-        cv.imshow("Image récupérée (Affine)", img_recovered_affine)
-        cv.waitKey(0)
-        cv.destroyAllWindows()
-
-    if M_projective is not None:
-        # Appliquer la transformation projective
-        img_recovered_projective = cv.warpPerspective(img_transformed, M_projective, (img_transformed.shape[1], img_transformed.shape[0]))
-        cv.imshow("Image récupérée (Projective)", img_recovered_projective)
-        cv.waitKey(0)
-        cv.destroyAllWindows()
+    M_transform = cv.findHomography(pts_trans_np, pts_ref_np, cv.RANSAC, 5.0)[0]
+    print("Matrice de transformation homographique :")
+    print(M_transform)
 
 
-#M_affine, M_projective, mire_utilisee, nb_points = calculer_transformation(motifs_data)
-# Avec affichage des erreurs et de la figure :
-#calculer_transformation(motifs_data)
+    img_aligned = cv.warpPerspective(img_transformed, M_transform, (img_original.shape[1], img_original.shape[0]))
 
-# Ou sans affichage (utile pour automatiser) :
-# calculer_transformation(motifs_data, afficher_resultats=False)
-# 1. Calculer la matrice de transformation (affine ou projective)
-M_affine, M_projective,best_mire_name,lenlen = calculer_transformation(motifs_data,afficher_resultats=False)
-
-# 2. Appliquer la transformation à l'image transformée
-appliquer_transformation(img_transformed, M_affine, M_projective)
-
+    cv.imshow("Original", img_original)
+    cv.imshow("Transformée", img_transformed)
+    cv.imshow("Alignée", img_aligned)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
+    cv.imwrite("aligned_output.png", img_aligned)

@@ -66,7 +66,7 @@ r_z = 46
 
 ## @var bool_rxy
 #  Determines the rotation order 'xy' or 'yx' when both r_x and r_y are used.
-bool_rxy = None  # PAS TOUCHE PTIT CON
+bool_rxy = None  # PAS TOUCHE PTIT
 
 ## @var sens_rxy
 #  Specifies the rotation order ('xy' or 'yx') when both r_x and r_y are used.
@@ -665,7 +665,7 @@ def fullContoursProcess(img):
             cv.imshow("thresh"+str(i), img_thresh)
         if save_data[6]:
             cv.imwrite("data/thresh"+str(i)+".png", img_thresh)
-        findContours2(img_thresh, i)
+        findContours(img_thresh, i)
 
 
 
