@@ -11,6 +11,7 @@ max_distance = 100
 # === Variables exportables ===
 base_mire = []
 motifs_data = []
+M_transform = []
 
 
 # === Recherche d'un voisin dans une direction donnée ===
@@ -188,8 +189,16 @@ def run_alignment_pipeline(image_original_path, image_transformed_path):
         cv.waitKey(0)
         cv.destroyAllWindows()
 
-        # Save the aligned image
-        cv.imwrite("aligned_output.png", img_aligned)
+        with open("data/result.txt", "w") as file:
+            file.write("-------- ENCODAGE MIRE ORIGINALE --------\n-------- ((x,y),(codage_voisin_0_degree),(codage_voisin_90_degree),(codage_voisin_180_degree),(codage_voisin_270_degree)) --------\n\n")
+            for k, v, w, x, y in base_mire:
+                file.write(f"{k}, {v}, {w}, {x}, {y}\n")
+            file.write("\n\n-------- ENCODAGE MIRE MODIFIEE --------\n-------- ((x,y),(codage_voisin)) --------\n\n")
+            for k, v, in motifs_data:
+                file.write(f"{k}, {v}\n")
+            file.write("\n\n-------- MATRICE DE TRANSFORMATION --------\n")
+            file.write(f"{M_transform}\n")
+
         return M_transform
 
     except RuntimeError as e:
