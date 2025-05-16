@@ -572,7 +572,7 @@ def angleRedPattern(img):
         img (numpy.ndarray): Input image to process.
 
     Returns:
-        int: The average orientation angle of the detected red patterns.
+        int or None: The average orientation angle of the detected red patterns, or None if no valid red patterns are found to determine an angle.
 
     Notes:
         - Applies a mask to the input image using `maskMotif` to isolate red patterns.
@@ -585,43 +585,93 @@ def angleRedPattern(img):
     Global Variables:
         - mask (list): List of color ranges used for masking.
         - threshold (list): List of threshold values used for contour detection.
-        - angle_tab (list): Stores the orientation angles of detected patterns.
+        - angle_tab (list): Stores the orientation angles of detected patterns. (Note: This is now initialized inside the function).
         - show_data (list): Flags controlling which intermediate steps are displayed.
         - save_data (list): Flags controlling which intermediate steps are saved.
-
-    Example:
-        >>> img = cv.imread("example.png")
-        >>> average_angle = angleRedPattern(img)
-        >>> print(f"Average orientation angle of red patterns: {average_angle} degrees")
+        - limit_area (int): Minimum area required for a contour to be considered.
+        - limit_extrm_angle (float): Tolerance for filtering outlier angles.
     """
-    filtered_img=maskMotif(img, mask[1])
-    contours, _ = cv.findContours(image=grayAndThreshold(filtered_img, threshold[1]),
-                                  mode=cv.RETR_TREE, 
+    # Initialize angle_tab inside the function to avoid contamination from previous runs
+    angle_tab=[]
+
+    filtered_img = maskMotif(img, mask[1]) # mask[1] should be the red mask
+    img_thresh = grayAndThreshold(filtered_img, threshold[1]) # threshold[1] for red mask
+    contours, _ = cv.findContours(image=img_thresh,
+                                  mode=cv.RETR_TREE,
                                   method=cv.CHAIN_APPROX_SIMPLE,
-                                  offset=(0,0))#RETR_LIST,
-    red_pattern_minAreaRect_mire=filtered_img.copy()
+                                  offset=(0,0))
+
+    red_pattern_minAreaRect_mire = filtered_img.copy() # Initialize image for drawing
+
     for c in contours:
-        temp=cv.minAreaRect(c)
-        #print(temp)
+        # Filter by area
+        if cv.contourArea(c) <= limit_area:
+            continue
+
+        # Calculate min area rectangle and append angle
+        # Note: cv.minAreaRect returns ((center_x, center_y), (width, height), angle)
+        temp = cv.minAreaRect(c)
+        # The angle is in [-90, 0) degrees. It's the angle between the horizontal axis
+        # and the first side (which is the longer side if width < height, shorter otherwise).
+        # We might need to adjust this angle depending on the expected orientation.
+        # For now, let's just take the raw angle:
         angle_tab.append(temp[-1])
-        
+
+        # Optional drawing for debugging/visualization
         if show_data[7] or save_data[7]:
             box = cv.boxPoints(temp)
             box = np.intp(box)
             cv.drawContours(red_pattern_minAreaRect_mire,[box],0,(0,255,255),2)
-    Q_angle_tab=np.quantile(angle_tab, [0.25, 0.5, 0.75])
-    Q_angle_tab_mean=np.mean(Q_angle_tab)
-    i = len(angle_tab) - 1
-    while i >= 0:
-        if Q_angle_tab_mean+5 < angle_tab[i] or Q_angle_tab_mean-5 > angle_tab[i]:
-            angle_tab.pop(i)
-        i -= 1
-    angle_tab_mean=np.mean(angle_tab)
+
+    # --- Handle case where no red patterns were found or all were filtered by area ---
+    if not angle_tab:
+        print("Warning: No red patterns found with sufficient area to determine angle.")
+        if show_data[7]:
+            cv.imshow("minAreaRectRedPattern", red_pattern_minAreaRect_mire)
+        if save_data[8]:
+            cv.imwrite("minAreaRectRedPattern.png", red_pattern_minAreaRect_mire)
+        return None # Return None or a specific value to indicate failure
+
+    # --- Filter outlier angles using quantiles ---
+    # Check if there are enough angles for quantile calculation (at least 4 for quartiles)
+    if len(angle_tab) < 4:
+         print(f"Warning: Only {len(angle_tab)} red patterns found. Skipping angle outlier filtering.")
+         # If filtering is skipped, angle_tab_mean will be calculated from the existing list
+
+    else:
+        Q_angle_tab = np.quantile(angle_tab, [0.25, 0.5, 0.75])
+        Q_angle_tab_mean = np.mean(Q_angle_tab) # Mean of the quartiles
+
+        # Handle potential NaN if quantile calculation failed (e.g., very few points)
+        if np.isnan(Q_angle_tab_mean):
+             print("Warning: Quantile mean calculation resulted in NaN. Skipping angle outlier filtering.")
+        else:
+             # Iterate backwards to safely remove elements
+             i = len(angle_tab) - 1
+             while i >= 0:
+                 # Use limit_extrm_angle defined globally (default 5.0)
+                 if Q_angle_tab_mean + limit_extrm_angle < angle_tab[i] or Q_angle_tab_mean - limit_extrm_angle > angle_tab[i]:
+                     angle_tab.pop(i)
+                 i -= 1
+
+    # --- Handle case where all angles were filtered out ---
+    if not angle_tab:
+        print("Warning: All red pattern angles filtered out. Cannot determine angle.")
+        if show_data[7]:
+            cv.imshow("minAreaRectRedPattern", red_pattern_minAreaRect_mire)
+        if save_data[8]:
+            cv.imwrite("minAreaRectRedPattern.png", red_pattern_minAreaRect_mire)
+        return None # Return None or a specific value to indicate failure
+
+    # --- Calculate the mean of the remaining angles ---
+    angle_tab_mean = np.mean(angle_tab)
+
     if show_data[7]:
         cv.imshow("minAreaRectRedPattern",red_pattern_minAreaRect_mire)
     if save_data[8]:
         cv.imwrite("minAreaRectRedPattern.png", red_pattern_minAreaRect_mire)
 
+    # Convert to int and return (now angle_tab_mean is guaranteed not to be NaN)
     return int(angle_tab_mean)
 
 def fullContoursProcess(img):

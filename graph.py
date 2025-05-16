@@ -7,6 +7,7 @@ import numpy as np
 from PIL import Image
 import code2
 import search
+import crop_gui
 
 customtkinter.set_appearance_mode("Dark")
 customtkinter.set_default_color_theme("dark-blue")
@@ -22,7 +23,7 @@ class CustomGUI(customtkinter.CTk):
     def __init__(self):
         super().__init__()
         self.title("Projet Ingénieur Groupe 3")
-        self.geometry("1200x700")
+        self.geometry("1200x560")
 
         # === FRAME PRINCIPAL ===
         self.left_frame = customtkinter.CTkFrame(self, width=350)
@@ -154,8 +155,9 @@ class CustomGUI(customtkinter.CTk):
         img = cv.imread("mire_315a.png")
         if img is None:
             raise ValueError("Erreur de chargement de l'image mire_315a.png")
-        search.generate_base_mire(img)
-        search.add_rotated_codes(search.motifs_data)
+        search.base_mire_raw = search.generate_base_mire(img, start_angle=0)
+        search.base_mire = search.add_rotated_codes(search.base_mire_raw)
+
 
         for slider in self.sliders.values():
             slider.configure(state="normal")
@@ -237,11 +239,36 @@ class CustomGUI(customtkinter.CTk):
         self.destroy()
         sys.exit()
 
-    def run_final_processing(self):
+    #def run_final_processing(self):
         # Ici tu peux appeler ta fonction principale si besoin
-        #search.main()
+        #search.compute_homography_matrix(search.base_mire,search.motifs_data)
+        #self.destroy()
+        #sys.exit()
+
+    def run_final_processing(self):
+        # Récupération des paramètres
+        t = [
+            self.sliders["Translation X"].get(),
+            self.sliders["Translation Y"].get(),
+            self.sliders["Translation Z (Zoom)"].get(),
+        ]
+        r = [self.sliders[f"Rotation {a}"].get() for a in "XYZ"]
+        code2.t_x, code2.t_y, code2.t_z = t
+        code2.r_x, code2.r_y, code2.r_z = r
+        code2.show_data = [v.get() for v in self.show_data_vars]
+        code2.save_data = [v.get() for v in self.save_data_vars]
+
+        # Exécution du traitement final
+        #search.motifs_data = code2.main()
+
+        # Appel de la fonction de calcul d'homographie
+        #search.compute_homography_matrix(search.base_mire, search.motifs_data)
+        search.run_alignment_pipeline("mire_315a.png","data/trans.png")
+
+        # Fin de l'application
         self.destroy()
         sys.exit()
+
 
 if __name__ == "__main__":
     app = CustomGUI()

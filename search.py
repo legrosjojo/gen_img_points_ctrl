@@ -1,5 +1,3 @@
-# Nouveau search2.py : version simplifiée avec une seule base_mire
-
 import cv2 as cv
 import numpy as np
 import code2
@@ -10,9 +8,12 @@ distance_init = 5
 step_size = 5
 max_distance = 100
 
+# === Variables exportables ===
+base_mire = []
 motifs_data = []
 
-# === Fonction globale : Recherche de voisin ===
+
+# === Recherche d'un voisin dans une direction donnée ===
 def find_neighbor(center_tab, cx, cy, angle, init_dist=5, step_size=5, max_dist=100):
     angle_rad = math.radians(angle)
     d = init_dist
@@ -27,7 +28,8 @@ def find_neighbor(center_tab, cx, cy, angle, init_dist=5, step_size=5, max_dist=
         d += step_size
     return "N"
 
-# === Fonction globale : Codage d'un motif ===
+
+# === Génération du code d’un motif donné ===
 def process_motif(center_tab, index, start_angle):
     motif_x, motif_y, motif_type = center_tab[index]
     neighbors = []
@@ -37,7 +39,8 @@ def process_motif(center_tab, index, start_angle):
     code = str(motif_type) + ''.join(str(n) for n in neighbors)
     return (f"({int(motif_x)}, {int(motif_y)})", code)
 
-# === Fonction : Génération de la base mire ===
+
+# === Génération de la base mire à partir de l'image de référence ===
 def generate_base_mire(image, start_angle=0):
     code2.center_tab = []
     code2.transformed_mire = image
@@ -49,7 +52,8 @@ def generate_base_mire(image, start_angle=0):
         for coord, code in [process_motif(center_tab, i, start_angle) for i in range(len(center_tab))]
     ]
 
-# === Fonction : Ajout des codes tournés ===
+
+# === Ajout des codes tournés (90°, 180°, 270°) ===
 def add_rotated_codes(base_mire):
     updated = []
     for coord, code_0, _, _, _ in base_mire:
@@ -64,37 +68,14 @@ def add_rotated_codes(base_mire):
         updated.append((coord, code_0, code_90, code_180, code_270))
     return updated
 
-# === Code principal (à exécuter uniquement si le script est lancé directement) ===
-if __name__ == "__main__":
-    image_original_path = "mire_315a.png"
-    image_transformed_path = "data/trans.png"
 
-    img_original = cv.imread(image_original_path)
-    img_transformed = cv.imread(image_transformed_path)
-
-    if img_original is None or img_transformed is None:
-        raise ValueError("Erreur de chargement des images.")
-
-    print("Génération de la base mire à partir de l'image originale...")
-    base_mire_raw = generate_base_mire(img_original, start_angle=0)
-    base_mire_complete = add_rotated_codes(base_mire_raw)
-
-    print("Détection des motifs dans l'image transformée...")
-    code2.center_tab = []
-    code2.transformed_mire = img_transformed
-    code2.fullContoursProcess(img_transformed)
-    center_tab_transformed = code2.center_tab.copy()
-
-    starting_angle = code2.angleRedPattern(img_transformed)
-
-    motifs_data = [process_motif(center_tab_transformed, i, starting_angle) for i in range(len(center_tab_transformed))]
-
-    print("Recherche de la meilleure orientation...")
+# === Calcul de la matrice d’homographie entre motifs transformés et base mire ===
+def compute_homography_matrix(base_mire, motifs_data, min_matches=4):
     lookup_dicts = {
-        "0": {code: coord for coord, code, _, _, _ in base_mire_complete},
-        "90": {code: coord for coord, _, code, _, _ in base_mire_complete},
-        "180": {code: coord for coord, _, _, code, _ in base_mire_complete},
-        "270": {code: coord for coord, _, _, _, code in base_mire_complete},
+        "0": {code: coord for coord, code, _, _, _ in base_mire},
+        "90": {code: coord for coord, _, code, _, _ in base_mire},
+        "180": {code: coord for coord, _, _, code, _ in base_mire},
+        "270": {code: coord for coord, _, _, _, code in base_mire},
     }
 
     best_angle = None
@@ -109,7 +90,7 @@ if __name__ == "__main__":
             best_lookup = lookup
             best_count = count
 
-    if best_lookup is None or best_count < 4:
+    if best_lookup is None or best_count < min_matches:
         raise RuntimeError("Pas assez de correspondances pour calculer la transformation.")
 
     print(f"Meilleure orientation : {best_angle}° avec {best_count} correspondances")
@@ -130,15 +111,98 @@ if __name__ == "__main__":
     pts_ref_np = np.array(points_reference, dtype=np.float32)
 
     M_transform = cv.findHomography(pts_trans_np, pts_ref_np, cv.RANSAC, 5.0)[0]
-    print("Matrice de transformation homographique :")
-    print(M_transform)
+    return M_transform
 
 
-    img_aligned = cv.warpPerspective(img_transformed, M_transform, (img_original.shape[1], img_original.shape[0]))
+# === Pipeline principal ===
+# === Pipeline principal ===
+def run_alignment_pipeline(image_original_path, image_transformed_path):
+    img_original = cv.imread(image_original_path)
+    img_transformed = cv.imread(image_transformed_path)
 
-    cv.imshow("Original", img_original)
-    cv.imshow("Transformée", img_transformed)
-    cv.imshow("Alignée", img_aligned)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
-    cv.imwrite("aligned_output.png", img_aligned)
+    if img_original is None:
+         print(f"Error: Could not load original image from {image_original_path}")
+         return None
+    if img_transformed is None:
+         print(f"Error: Could not load transformed image from {image_transformed_path}")
+         return None
+
+    print("Génération de la base mire à partir de l'image originale...")
+    # Ensure code2.center_tab is cleared before use in generate_base_mire
+    code2.center_tab = []
+    code2.transformed_mire = img_original # Use original image for base mire generation
+    # Temporarily disable show/save flags that might pop up windows during base mire gen
+    original_show_data = code2.show_data.copy()
+    original_save_data = code2.save_data.copy()
+    code2.show_data = [False] * len(code2.show_data)
+    code2.save_data = [False] * len(code2.save_data)
+
+    base_mire_raw = generate_base_mire(img_original, start_angle=0)
+    base_mire = add_rotated_codes(base_mire_raw)
+
+    # Restore original show/save flags
+    code2.show_data = original_show_data
+    code2.save_data = original_save_data
+
+
+    print("Détection des motifs dans l'image transformée...")
+    # Ensure code2.center_tab is cleared before use
+    code2.center_tab = []
+    code2.transformed_mire = img_transformed # Use transformed image for motif detection
+    code2.fullContoursProcess(img_transformed)
+    center_tab_transformed = code2.center_tab.copy() # Get the centers found in the transformed image
+
+    # Get the starting angle from red patterns in the transformed image
+    starting_angle = code2.angleRedPattern(img_transformed)
+
+    # --- Check if angle determination failed ---
+    if starting_angle is None:
+        print("Error: Could not determine the starting angle of red patterns in the transformed image. Alignment aborted.")
+        # Optionally display images before exiting
+        cv.imshow("Original", img_original)
+        cv.imshow("Transformée", img_transformed)
+        print("Alignment failed.")
+        cv.waitKey(0)
+        cv.destroyAllWindows()
+        return None # Indicate failure
+
+    print(f"Detected starting angle: {starting_angle}°")
+
+    # Process the detected motifs using the determined starting angle
+    motifs_data = [process_motif(center_tab_transformed, i, starting_angle) for i in range(len(center_tab_transformed))]
+
+    print("Calculating homography matrix...")
+    try:
+        M_transform = compute_homography_matrix(base_mire, motifs_data)
+
+        print("Homography transformation matrix:")
+        print(M_transform)
+
+        # Apply the homography matrix to align the transformed image to the original
+        img_aligned = cv.warpPerspective(img_transformed, M_transform, (img_original.shape[1], img_original.shape[0]))
+
+        # Display results
+        cv.imshow("Original", img_original)
+        cv.imshow("Transformée", img_transformed)
+        cv.imshow("Alignée", img_aligned)
+        cv.waitKey(0)
+        cv.destroyAllWindows()
+
+        # Save the aligned image
+        cv.imwrite("aligned_output.png", img_aligned)
+        return M_transform
+
+    except RuntimeError as e:
+        print(f"Alignment failed during homography calculation: {e}")
+        # Optionally display images before exiting
+        cv.imshow("Original", img_original)
+        cv.imshow("Transformée", img_transformed)
+        print("Alignment failed.")
+        cv.waitKey(0)
+        cv.destroyAllWindows()
+        return None # Indicate failure
+
+
+# === Exécution si lancé directement ===
+if __name__ == "__main__":
+    run_alignment_pipeline("mire_315a.png", "data/trans.png")
