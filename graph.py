@@ -7,7 +7,6 @@ import numpy as np
 from PIL import Image
 import code2
 import search
-import crop_gui
 
 customtkinter.set_appearance_mode("Dark")
 customtkinter.set_default_color_theme("dark-blue")
@@ -35,7 +34,7 @@ class CustomGUI(customtkinter.CTk):
         self.image_label = customtkinter.CTkLabel(self.right_frame, text="Image")
         self.image_label.pack(fill="both", expand=True)
 
-        self.validate_button = customtkinter.CTkButton(self.right_frame, text="Validate", command=self.confirm_transformed_image, state="disabled")
+        self.validate_button = customtkinter.CTkButton(self.right_frame, text="Validate", command=self.run_final_processing, state="disabled")
         self.validate_button.pack(pady=10)
 
         self.pil_image = None
@@ -56,11 +55,11 @@ class CustomGUI(customtkinter.CTk):
         self.create_sliders()
         self.create_checkboxes()
 
-        # Empêche l'interaction tant que mire_315a.png n'est pas validée
+        # Empêche l'interaction tant que mire_315a.png n'est pas chargée
         self.disable_controls()
 
-        # Affiche la première image avec demande de validation
-        self.show_image_confirmation("mire_315a.png", "Confirmer l'image de base ?", self.enable_controls, is_first_popup=True)
+        # Chargement automatique et activation
+        self.load_base_image_and_enable_controls()
 
     def create_sliders(self):
         slider_params = [
@@ -147,8 +146,8 @@ class CustomGUI(customtkinter.CTk):
     def disable_controls(self):
         for slider in self.sliders.values():
             slider.configure(state="disabled")
-        for entry in self.entry_vars.values():
-            entry.set("")
+        for entry_var in self.entry_vars.values():
+            entry_var.set("")
         self.validate_button.configure(state="disabled")
 
     def enable_controls(self):
@@ -158,92 +157,19 @@ class CustomGUI(customtkinter.CTk):
         search.base_mire_raw = search.generate_base_mire(img, start_angle=0)
         search.base_mire = search.add_rotated_codes(search.base_mire_raw)
 
-
         for slider in self.sliders.values():
             slider.configure(state="normal")
         self.validate_button.configure(state="normal")
         self.original_image = cv.cvtColor(img, cv.COLOR_BGR2RGB)
         self.update_image()
 
-    def confirm_transformed_image(self):
-        t = [
-            self.sliders["Translation X"].get(),
-            self.sliders["Translation Y"].get(),
-            self.sliders["Translation Z (Zoom)"].get(),
-        ]
-        r = [self.sliders[f"Rotation {a}"].get() for a in "XYZ"]
-        code2.t_x, code2.t_y, code2.t_z = t
-        code2.r_x, code2.r_y, code2.r_z = r
-        code2.show_data = [v.get() for v in self.show_data_vars]
-        code2.save_data = [v.get() for v in self.save_data_vars]
-
-        img = self.apply_transformations(self.original_image, *t, *r)
-        os.makedirs("data", exist_ok=True)
-        cv.imwrite("data/trans.png", cv.cvtColor(img, cv.COLOR_RGB2BGR))
-        self.show_image_confirmation("data/trans.png", "Valider l'image transformée ?", self.run_final_processing)
-
-    def show_image_confirmation(self, path, message, on_confirm_callback, is_first_popup=False):
-        overlay = customtkinter.CTkToplevel(self)
-        overlay.title("Confirmation requise")
-        overlay.geometry(f"700x500+{(overlay.winfo_screenwidth() - 700) // 2}+{(overlay.winfo_screenheight() - 500) // 2}")
-        overlay.grab_set()
-
-        container = customtkinter.CTkFrame(overlay)
-        container.pack(fill="both", expand=True, padx=10, pady=10)
-
-        left_frame = customtkinter.CTkFrame(container)
-        left_frame.pack(side="left", fill="both", expand=True)
-
-        img = Image.open(path)
-        img.thumbnail((350, 380))
-        ctk_img = customtkinter.CTkImage(img, size=img.size)
-        label_img = customtkinter.CTkLabel(left_frame, image=ctk_img)
-        label_img.image = ctk_img
-        label_img.pack(pady=10)
-
-        label_msg = customtkinter.CTkLabel(left_frame, text=message)
-        label_msg.pack(pady=5)
-
-        if is_first_popup:
-            right_frame = customtkinter.CTkFrame(container, width=200)
-            right_frame.pack(side="left", fill="y", padx=20)
-
-            customtkinter.CTkLabel(right_frame, text="Couleurs prédominantes", font=("Roboto", 14)).pack(pady=10)
-
-            global dominant_colors
-
-            self.color_boxes = []
-            self.color_labels = []
-
-            for color in dominant_colors:
-                box = customtkinter.CTkFrame(right_frame, width=80, height=80, fg_color="gray")
-                box.pack(pady=10)
-                box.pack_propagate(False)
-
-                hex_color = '#%02x%02x%02x' % color
-                box.configure(fg_color=hex_color)
-
-                label = customtkinter.CTkLabel(right_frame, text=f"R: {color[0]}  G: {color[1]}  B: {color[2]}")
-                label.pack()
-
-                self.color_boxes.append(box)
-                self.color_labels.append(label)
-
-        btn_frame = customtkinter.CTkFrame(overlay)
-        btn_frame.pack(pady=10)
-        customtkinter.CTkButton(btn_frame, text="Valider", command=lambda: [overlay.destroy(), on_confirm_callback()]).pack(side="left", padx=10)
-        customtkinter.CTkButton(btn_frame, text="Annuler", command=self.quit_app if is_first_popup else overlay.destroy).pack(side="right", padx=10)
-
-
-    def quit_app(self):
-        self.destroy()
-        sys.exit()
-
-    #def run_final_processing(self):
-        # Ici tu peux appeler ta fonction principale si besoin
-        #search.compute_homography_matrix(search.base_mire,search.motifs_data)
-        #self.destroy()
-        #sys.exit()
+    def load_base_image_and_enable_controls(self):
+        # Charge l'image de base et active les contrôles automatiquement sans popup
+        try:
+            self.enable_controls()
+        except Exception as e:
+            print(f"Erreur lors du chargement de l'image de base : {e}")
+            self.quit_app()
 
     def run_final_processing(self):
         # Récupération des paramètres
@@ -258,14 +184,19 @@ class CustomGUI(customtkinter.CTk):
         code2.show_data = [v.get() for v in self.show_data_vars]
         code2.save_data = [v.get() for v in self.save_data_vars]
 
-        # Exécution du traitement final
-        #search.motifs_data = code2.main()
+        # Applique la transformation et sauvegarde l'image transformée
+        img = self.apply_transformations(self.original_image, *t, *r)
+        os.makedirs("data", exist_ok=True)
+        cv.imwrite("data/trans.png", cv.cvtColor(img, cv.COLOR_RGB2BGR))
 
-        # Appel de la fonction de calcul d'homographie
-        #search.compute_homography_matrix(search.base_mire, search.motifs_data)
-        search.run_alignment_pipeline("mire_315a.png","data/trans.png")
+        # Exécute la pipeline d'alignement sans popup
+        search.run_alignment_pipeline("mire_315a.png", "data/trans.png")
 
         # Fin de l'application
+        self.destroy()
+        sys.exit()
+
+    def quit_app(self):
         self.destroy()
         sys.exit()
 

@@ -2,6 +2,9 @@ import customtkinter as ctk
 import cv2
 import numpy as np
 from PIL import Image, ImageTk
+import test2  # À mettre en haut du fichier
+import subprocess
+
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
@@ -169,10 +172,15 @@ class CropApp(ctk.CTk):
         M = cv2.getPerspectiveTransform(pts_src, pts_dst)
         img_cropped = cv2.warpPerspective(self.img_cv_orig, M, (CROP_WIDTH, CROP_HEIGHT))
         cv2.imwrite("mire_315a.png", cv2.cvtColor(img_cropped, cv2.COLOR_RGB2BGR))
+
+         # ✅ Appel au traitement automatique juste après le crop
+        test2.ameliorer_image("mire_315a.png", "mire_315a.png")
         
         self.label.configure(text="Image rognée sauvegardée sous 'mire_315a.png'")
         self.btn_crop.configure(state="disabled")
         self.destroy()
+
+        subprocess.run(["python", "graph.py"])
 
     def draw_polygon_and_mask(self):
         if len(selected_points) != 4:
