@@ -3,10 +3,7 @@ import numpy as np
 import sys
 import os
 import math
-import cv2 as cv
-import numpy as np
 
-import globals_
 #import tkinter
 #import tkinter.messagebox
 #import customtkinter
@@ -17,7 +14,7 @@ import globals_
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 ## @var path_mire_orig
 #  Path to the original target image.
-path_mire_orig = "data/mire_rebuild.png"
+path_mire_orig = "data/mire_315a.png"
 if path_mire_orig is None:
     sys.exit("err::Could not read the image.")
 
@@ -846,6 +843,5 @@ def main_code2():
 
     cv.waitKey(0)
 
-main()
 
 #libcamera pour

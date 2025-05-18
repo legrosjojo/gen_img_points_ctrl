@@ -20,15 +20,17 @@ pts_dst = []
 
 CROP_WIDTH = 512
 CROP_HEIGHT = 512
-if os.path.exists("data/mire_photo.png"):
-    IMAGE_PATH = "data/mire_photo.png"
-else : 
-    raise RuntimeError("Erreur data/mire_photo.png introuvable")
+IMAGE_PATH = ""
 
 
 class CropApp(ctk.CTk):
     def __init__(self):
         super().__init__()
+        if os.path.exists("data/mire_photo.png"):
+            IMAGE_PATH = "data/mire_photo.png"
+        else : 
+            raise RuntimeError("Erreur data/mire_photo.png introuvable")
+
         self.title("Sélection 4 points pour crop")
         self.geometry("800x600")  # taille initiale fenêtre
         

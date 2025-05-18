@@ -180,6 +180,5 @@ cython_debug/
 /latex
 /rtf
 #données générés
-/data
 #fichier test
 test.py

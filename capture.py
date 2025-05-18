@@ -1,16 +1,29 @@
 from pypylon import pylon
 import cv2
-import globals_
 import crop_gui
+import numpy as np
+import customtkinter as ctk
 
 def fullscreen(image):
-    if image is None:
-        raise ValueError("erreur image")
+    img = cv2.imread(image)
+    if img is None:
+        raise ValueError("Erreur impossible de lire l'image.")
 
-    nom="fullscreen"
+    app = ctk.CTk()
+    app.withdraw()  # Ne pas afficher la fenêtre
+    screen_width = app.winfo_screenwidth()
+    screen_height = app.winfo_screenheight()
+    app.destroy()
+    bg = np.zeros((screen_height, screen_width, 3), dtype=np.uint8)
+    y_offset = max(0, (screen_height - img.shape[0]) // 2)
+    x_offset = max(0, (screen_width - img.shape[1]) // 2)
+    img_cropped = img[:min(img.shape[0], screen_height), :min(img.shape[1], screen_width)]
+    bg[y_offset:y_offset+img_cropped.shape[0], x_offset:x_offset+img_cropped.shape[1]] = img_cropped
+
+    nom = "fullscreen"
     cv2.namedWindow(nom, cv2.WND_PROP_FULLSCREEN)
     cv2.setWindowProperty(nom, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-    cv2.imshow(nom, image)
+    cv2.imshow(nom, bg)
 
 def capture_color_image(filename):
     
@@ -50,5 +63,6 @@ def process_capture(image, filename):
     capture_color_image(filename)
 
 if __name__ == "__main__":
-    process_capture("data/mire_315a.png", "data/mire_photo.png"):
-    crop_gui.main_crop_gui()
+    process_capture("data/mire_315a.png", "data/mire_photo.png")
+    cv2.waitKey(0)
+    #crop_gui.main_crop_gui()
