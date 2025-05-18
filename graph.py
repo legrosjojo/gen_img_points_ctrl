@@ -196,7 +196,7 @@ class CustomGUI(customtkinter.CTk):
         cv.imwrite("data/mire_trans.png", cv.cvtColor(img, cv.COLOR_RGB2BGR))
         self.destroy()
         capture.process_capture("data/mire_trans.png", "data/mire_trans_photo.png")
-        crop_gui2.secondcrop()
+        crop_gui2.main_crop_gui()
         rebuild.ameliorer_image("data/mire_trans_crop.png", "data/mire_trasn_rebuild.png")
 
         # Exécute la pipeline d'alignement sans popup
