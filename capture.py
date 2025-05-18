@@ -24,6 +24,7 @@ def fullscreen(image):
     cv2.namedWindow(nom, cv2.WND_PROP_FULLSCREEN)
     cv2.setWindowProperty(nom, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
     cv2.imshow(nom, bg)
+    cv2.waitKey(0)
 
 def capture_color_image(filename):
     
@@ -57,6 +58,7 @@ def capture_color_image(filename):
         print("Erreur capture")
     grab_result.Release()
     camera.Close()
+    cv2.destroyAllWindows()
 
 def process_capture(image, filename):
     fullscreen(image)
@@ -64,5 +66,4 @@ def process_capture(image, filename):
 
 if __name__ == "__main__":
     process_capture("data/mire_315a.png", "data/mire_photo.png")
-    cv2.waitKey(0)
-    #crop_gui.main_crop_gui()
+    crop_gui.main_crop_gui()
