@@ -2,18 +2,28 @@ import customtkinter as ctk
 import cv2
 import numpy as np
 from PIL import Image, ImageTk
-import test2  # À mettre en haut du fichier
+import os
+
+
+import rebuild
+import graph
 import subprocess
+
 
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
 
 selected_points = []
+pts_src = []
+pts_dst = []
 
 CROP_WIDTH = 512
 CROP_HEIGHT = 512
-IMAGE_PATH = "photo_color.png"
+if os.path.exists("data/mire_photo.png"):
+    IMAGE_PATH = "data/mire_photo.png"
+else : 
+    raise RuntimeError("Erreur data/mire_photo.png introuvable")
 
 
 class CropApp(ctk.CTk):
@@ -171,16 +181,16 @@ class CropApp(ctk.CTk):
         
         M = cv2.getPerspectiveTransform(pts_src, pts_dst)
         img_cropped = cv2.warpPerspective(self.img_cv_orig, M, (CROP_WIDTH, CROP_HEIGHT))
-        cv2.imwrite("mire_315a.png", cv2.cvtColor(img_cropped, cv2.COLOR_RGB2BGR))
+        cv2.imwrite("data/mire_crop.png", cv2.cvtColor(img_cropped, cv2.COLOR_RGB2BGR))
 
          # ✅ Appel au traitement automatique juste après le crop
-        test2.ameliorer_image("mire_315a.png", "mire_315a.png")
+        rebuild.ameliorer_image("data/mire_crop.png", "data/mire_rebuild.png")
         
-        self.label.configure(text="Image rognée sauvegardée sous 'mire_315a.png'")
+        self.label.configure(text="Image rognée sauvegardée sous 'mire_crop&rebuilt.png'")
         self.btn_crop.configure(state="disabled")
         self.destroy()
 
-        subprocess.run(["python", "graph.py"])
+        graph.main_graph()
 
     def draw_polygon_and_mask(self):
         if len(selected_points) != 4:
@@ -229,6 +239,22 @@ class CropApp(ctk.CTk):
         # Mise à jour de l'image redimensionnée
         self.update_image()
 
+def secondcrop(image):
+    pts_src = np.array(selected_points, dtype=np.float32)
+    pts_dst = np.array([
+        [0, 0],
+        [CROP_WIDTH - 1, 0],
+        [CROP_WIDTH - 1, CROP_HEIGHT - 1],
+        [0, CROP_HEIGHT - 1]
+    ], dtype=np.float32)
+    
+    M = cv2.getPerspectiveTransform(pts_src, pts_dst)
+    img_cropped = cv2.warpPerspective(self.img_cv_orig, M, (CROP_WIDTH, CROP_HEIGHT))
+    cv2.imwrite("data/mire_crop.png", cv2.cvtColor(img_cropped, cv2.COLOR_RGB2BGR))
+
+def main_crop_gui() :
+    app = CropApp()
+    app.mainloop()
 
 if __name__ == "__main__":
     app = CropApp()

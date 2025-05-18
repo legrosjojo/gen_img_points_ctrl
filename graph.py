@@ -1,12 +1,16 @@
 import sys
 import os
-import tkinter as tk
-import customtkinter
 import cv2 as cv
 import numpy as np
 from PIL import Image
+
+import tkinter as tk
+import customtkinter
+
+import globals_
 import code2
 import search
+import capture
 
 customtkinter.set_appearance_mode("Dark")
 customtkinter.set_default_color_theme("dark-blue")
@@ -21,7 +25,7 @@ dominant_colors = [
 class CustomGUI(customtkinter.CTk):
     def __init__(self):
         super().__init__()
-        self.title("Projet Ingénieur Groupe 3")
+        self.title("Projet FIP Ingénieur Groupe 3")
         self.geometry("1200x560")
 
         # === FRAME PRINCIPAL ===
@@ -151,11 +155,12 @@ class CustomGUI(customtkinter.CTk):
         self.validate_button.configure(state="disabled")
 
     def enable_controls(self):
-        img = cv.imread("mire_315a.png")
-        if img is None:
-            raise ValueError("Erreur de chargement de l'image mire_315a.png")
+        img = cv.imread("data/mire_315a.png")
         search.base_mire_raw = search.generate_base_mire(img, start_angle=0)
         search.base_mire = search.add_rotated_codes(search.base_mire_raw)
+        if img is None:
+            raise ValueError("Erreur de chargement de l'image mire_315a.png")
+
 
         for slider in self.sliders.values():
             slider.configure(state="normal")
@@ -186,11 +191,15 @@ class CustomGUI(customtkinter.CTk):
 
         # Applique la transformation et sauvegarde l'image transformée
         img = self.apply_transformations(self.original_image, *t, *r)
-        os.makedirs("data", exist_ok=True)
-        cv.imwrite("data/trans.png", cv.cvtColor(img, cv.COLOR_RGB2BGR))
+        #os.makedirs("data", exist_ok=True)
+        cv.imwrite("data/mire_trans.png", cv.cvtColor(img, cv.COLOR_RGB2BGR))
+
+        capture.process_capture("data/mire_trans.png", "data/mire_trans_photo.png")
+        
+        rebuild.ameliorer_image("data/mire_trans_photo.png", "data/mire_trasn_rebuild.png")
 
         # Exécute la pipeline d'alignement sans popup
-        search.run_alignment_pipeline("mire_315a.png", "data/trans.png")
+        search.run_alignment_pipeline("mire_rebuild.png", "data/mire_trans_rebuild.png")
 
         # Fin de l'application
         self.destroy()
@@ -200,6 +209,9 @@ class CustomGUI(customtkinter.CTk):
         self.destroy()
         sys.exit()
 
+def main_graph():
+    app = CustomGUI()
+    app.mainloop()
 
 if __name__ == "__main__":
     app = CustomGUI()

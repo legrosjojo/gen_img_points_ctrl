@@ -68,7 +68,7 @@ def recolorer_avec_couleurs_fixes(image, couleurs_dominantes, seuil=80):
 
     return image_recolorée
 
-def ameliorer_image(image_path="mire_315a.png", sortie_path="mire_315a_rebuild.png", seuil=80):
+def ameliorer_image(image_path="data/mire_photo.png", sortie_path="data/mire_rebuild.png", seuil=80):
     image = cv2.imread(image_path)
     if image is None:
         raise FileNotFoundError(f"Image non trouvée : {image_path}")

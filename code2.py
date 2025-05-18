@@ -3,11 +3,13 @@ import numpy as np
 import sys
 import os
 import math
-import tkinter
-import tkinter.messagebox
 import cv2 as cv
 import numpy as np
-import customtkinter
+
+import globals_
+#import tkinter
+#import tkinter.messagebox
+#import customtkinter
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
@@ -15,7 +17,7 @@ import customtkinter
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 ## @var path_mire_orig
 #  Path to the original target image.
-path_mire_orig = "mire_315a.png"
+path_mire_orig = "data/mire_rebuild.png"
 if path_mire_orig is None:
     sys.exit("err::Could not read the image.")
 
@@ -778,7 +780,7 @@ def encodeur(img):
 #                                            MAIN                                                #
 ##################################################################################################
 
-def main():
+def main_code2():
 
     if show_data[0]:
         cv.imshow("Mire originale", mire_orig)
@@ -801,7 +803,6 @@ def main():
         cv.imwrite("data/contours.png", contours_mire)
 
     angle = angleRedPattern(transformed_mire)
-    print(angle)
 
 
     if save_data[0]:
