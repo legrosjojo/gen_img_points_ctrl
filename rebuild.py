@@ -31,17 +31,20 @@ def is_reddish_dash(r, g, b):
 
 # --- Étape 1 : Recolorier l'image ---
 def recolor_image(input_image_path, output_image_path):
-    original_img = Image.open(input_image_path).convert("RGB")
+    try:
+        original_img = Image.open(input_image_path).convert("RGB")
+    except FileNotFoundError:
+        print(f"Erreur : Le fichier '{input_image_path}' n'a pas été trouvé.")
+        return None
+
     width, height = original_img.size
     new_img = Image.new("RGB", (width, height))
-
     original_pixels = original_img.load()
     new_pixels = new_img.load()
 
     for y in range(height):
         for x in range(width):
             r, g, b = original_pixels[x, y]
-
             if is_white_bg(r, g, b):
                 new_pixels[x, y] = COLOR_WHITE
             elif is_green_dot(r, g, b):
@@ -58,7 +61,15 @@ def recolor_image(input_image_path, output_image_path):
 
 # --- Étape 2 : Épaissir les motifs ---
 def thicken_shapes(input_image_path, output_image_path):
-    img = Image.open(input_image_path).convert("RGB")
+    if input_image_path is None:
+        return None
+
+    try:
+        img = Image.open(input_image_path).convert("RGB")
+    except FileNotFoundError:
+        print(f"Erreur : Le fichier '{input_image_path}' pour l'épaississement n'a pas été trouvé.")
+        return None
+
     width, height = img.size
     input_pixels = img.load()
     thick_img = img.copy()
@@ -99,7 +110,12 @@ def thicken_shapes(input_image_path, output_image_path):
 
 # --- Étape 3 : Nettoyage des motifs par couleur dominante ---
 def clean_motifs(input_image_path, output_image_path):
-    img = Image.open(input_image_path).convert("RGB")
+    try:
+        img = Image.open(input_image_path).convert("RGB")
+    except FileNotFoundError:
+        print(f"Erreur : Le fichier '{input_image_path}' pour le nettoyage n'a pas été trouvé.")
+        return None
+
     img_array = np.array(img)
     h, w, _ = img_array.shape
 
@@ -129,8 +145,9 @@ def clean_motifs(input_image_path, output_image_path):
 
     cleaned_pil = Image.fromarray(cleaned_img, "RGB")
     cleaned_pil.save(output_image_path)
+    return output_image_path
 
-# --- Fonction principale ---
+# --- Fonction principale attendue par les autres scripts ---
 def ameliorer_image(image_path="data/mire_photo.png", sortie_path="data/mire_rebuild.png"):
     base_name = os.path.splitext(os.path.basename(image_path))[0]
     recolored_path = f"temp/{base_name}_recolor.png"
