@@ -193,8 +193,9 @@ class CustomGUI(customtkinter.CTk):
         img = self.apply_transformations(self.original_image, *t, *r)
         #os.makedirs("data", exist_ok=True)
         cv.imwrite("data/mire_trans.png", cv.cvtColor(img, cv.COLOR_RGB2BGR))
-
+        self.destroy()
         capture.process_capture("data/mire_trans.png", "data/mire_photo.png")
+        crop_gui.bool_second=False
         crop_gui.main_crop_gui()
         rebuild.ameliorer_image("data/mire_trans_crop.png", "data/mire_trasn_rebuild.png")
 

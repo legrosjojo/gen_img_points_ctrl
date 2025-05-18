@@ -17,6 +17,7 @@ ctk.set_default_color_theme("dark-blue")
 selected_points = []
 pts_src = []
 pts_dst = []
+bool_second=True
 
 CROP_WIDTH = 512
 CROP_HEIGHT = 512
@@ -192,7 +193,8 @@ class CropApp(ctk.CTk):
         self.btn_crop.configure(state="disabled")
         self.destroy()
 
-        graph.main_graph()
+        if bool_second :
+            graph.main_graph()
 
     def draw_polygon_and_mask(self):
         if len(selected_points) != 4:
