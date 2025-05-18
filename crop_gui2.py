@@ -8,6 +8,7 @@ import os
 import rebuild
 import graph
 import subprocess
+import search
 
 
 
@@ -184,11 +185,12 @@ class CropApp(ctk.CTk):
         
         M = cv2.getPerspectiveTransform(pts_src, pts_dst)
         img_cropped = cv2.warpPerspective(self.img_cv_orig, M, (CROP_WIDTH, CROP_HEIGHT))
-        cv2.imwrite("data/mire_crop.png", cv2.cvtColor(img_cropped, cv2.COLOR_RGB2BGR))
+        cv2.imwrite("data/mire_trans_crop.png", cv2.cvtColor(img_cropped, cv2.COLOR_RGB2BGR))
 
          # ✅ Appel au traitement automatique juste après le crop
-        rebuild.ameliorer_image("data/mire_trans_crop.png", "data/mire__trans_rebuild.png")
-        
+        rebuild.ameliorer_image("data/mire_trans_crop.png", "data/mire_trans_rebuild.png")
+        # Exécute la pipeline d'alignement sans popup
+        search.run_alignment_pipeline("data/mire_rebuild.png", "data/mire_trans_rebuild.png")
         self.label.configure(text="Image rognée sauvegardée sous 'mire_trans_crop&rebuilt.png'")
         self.btn_crop.configure(state="disabled")
         self.destroy()
