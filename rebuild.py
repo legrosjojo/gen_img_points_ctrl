@@ -1,12 +1,22 @@
 from PIL import Image
+import numpy as np
+from scipy.ndimage import label
+import os
 
-# Définir les couleurs fixes (RGB)
+# --- Définition des couleurs fixes ---
 COLOR_WHITE = (255, 255, 255)
 COLOR_BLACK = (0, 0, 0)
 COLOR_RED = (255, 0, 0)
 COLOR_GREEN = (0, 255, 0)
 
-# Fonctions de détection par seuils
+COLOR_ID_MAP = {
+    COLOR_BLACK: 1,
+    COLOR_RED: 2,
+    COLOR_GREEN: 3
+}
+ID_COLOR_MAP = {v: k for k, v in COLOR_ID_MAP.items()}
+
+# --- Seuils de détection des couleurs originales ---
 def is_white_bg(r, g, b):
     return r > 230 and g > 230 and b > 230
 
@@ -19,12 +29,9 @@ def is_blueish_ring(r, g, b):
 def is_reddish_dash(r, g, b):
     return r > 180 and g < 180 and b < 180
 
+# --- Étape 1 : Recolorier l'image ---
 def recolor_image(input_image_path, output_image_path):
-    try:
-        original_img = Image.open(input_image_path).convert("RGB")
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Erreur : Le fichier '{input_image_path}' n'a pas été trouvé.")
-
+    original_img = Image.open(input_image_path).convert("RGB")
     width, height = original_img.size
     new_img = Image.new("RGB", (width, height))
 
@@ -44,21 +51,16 @@ def recolor_image(input_image_path, output_image_path):
             elif is_reddish_dash(r, g, b):
                 new_pixels[x, y] = COLOR_RED
             else:
-                new_pixels[x, y] = COLOR_WHITE  # Par défaut : fond blanc
+                new_pixels[x, y] = COLOR_WHITE
 
     new_img.save(output_image_path)
-    print(f"[INFO] Étape 1 : Image recolorée sauvegardée dans '{output_image_path}'")
     return output_image_path
 
+# --- Étape 2 : Épaissir les motifs ---
 def thicken_shapes(input_image_path, output_image_path):
-    try:
-        img = Image.open(input_image_path).convert("RGB")
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Erreur : Le fichier '{input_image_path}' pour épaississement n'a pas été trouvé.")
-
+    img = Image.open(input_image_path).convert("RGB")
     width, height = img.size
     input_pixels = img.load()
-
     thick_img = img.copy()
     output_pixels = thick_img.load()
 
@@ -93,18 +95,51 @@ def thicken_shapes(input_image_path, output_image_path):
                     output_pixels[x, y] = COLOR_RED
 
     thick_img.save(output_image_path)
-    print(f"[INFO] Étape 2 : Image épaissie sauvegardée dans '{output_image_path}'")
     return output_image_path
 
-def ameliorer_image(image_path="data/mire_photo.png", sortie_path="data/mire_rebuild.png"):
-    image_intermediaire = "temp_recolor.png"
-    path_recolored = recolor_image(image_path, image_intermediaire)
-    path_final = thicken_shapes(path_recolored, sortie_path)
-    return path_final
+# --- Étape 3 : Nettoyage des motifs par couleur dominante ---
+def clean_motifs(input_image_path, output_image_path):
+    img = Image.open(input_image_path).convert("RGB")
+    img_array = np.array(img)
+    h, w, _ = img_array.shape
 
-# --- Exemple d'utilisation ---
-if __name__ == "__main__":
-    try:
-        ameliorer_image("data/mire_photo.png", "data/mire_rebuild.png")
-    except FileNotFoundError as e:
-        print(e)
+    id_map = np.zeros((h, w), dtype=np.uint8)
+    for color, idx in COLOR_ID_MAP.items():
+        mask = np.all(img_array == color, axis=2)
+        id_map[mask] = idx
+
+    non_white_mask = np.any(img_array != COLOR_WHITE, axis=2)
+    structure = np.ones((3, 3), dtype=np.uint8)
+    labeled_array, num_features = label(non_white_mask, structure=structure)
+
+    for motif_id in range(1, num_features + 1):
+        motif_mask = labeled_array == motif_id
+        motif_pixels = id_map[motif_mask]
+
+        if len(motif_pixels) == 0:
+            continue
+
+        unique_ids, counts = np.unique(motif_pixels, return_counts=True)
+        dominant_id = unique_ids[np.argmax(counts)]
+        id_map[motif_mask] = dominant_id
+
+    cleaned_img = np.full((h, w, 3), COLOR_WHITE, dtype=np.uint8)
+    for idx, color in ID_COLOR_MAP.items():
+        cleaned_img[id_map == idx] = color
+
+    cleaned_pil = Image.fromarray(cleaned_img, "RGB")
+    cleaned_pil.save(output_image_path)
+
+# --- Fonction principale ---
+def ameliorer_image(image_path="data/mire_photo.png", sortie_path="data/mire_rebuild.png"):
+    base_name = os.path.splitext(os.path.basename(image_path))[0]
+    recolored_path = f"temp/{base_name}_recolor.png"
+    thickened_path = f"temp/{base_name}_thick.png"
+    final_output_path = sortie_path
+
+    os.makedirs("temp", exist_ok=True)
+
+    path1 = recolor_image(image_path, recolored_path)
+    path2 = thicken_shapes(path1, thickened_path)
+    if path2:
+        clean_motifs(path2, final_output_path)
