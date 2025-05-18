@@ -190,10 +190,11 @@ class CropApp(ctk.CTk):
          # ✅ Appel au traitement automatique juste après le crop
         rebuild.ameliorer_image("data/mire_trans_crop.png", "data/mire_trans_rebuild.png")
         # Exécute la pipeline d'alignement sans popup
-        search.run_alignment_pipeline("data/mire_rebuild.png", "data/mire_trans_rebuild.png")
         self.label.configure(text="Image rognée sauvegardée sous 'mire_trans_crop&rebuilt.png'")
         self.btn_crop.configure(state="disabled")
         self.destroy()
+        search.run_alignment_pipeline("data/mire_rebuild.png", "data/mire_trans_rebuild.png")
+        
 
 
     def draw_polygon_and_mask(self):
