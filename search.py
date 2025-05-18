@@ -214,4 +214,4 @@ def run_alignment_pipeline(image_original_path, image_transformed_path):
 
 # === Exécution si lancé directement ===
 if __name__ == "__main__":
-    run_alignment_pipeline("mire_315a.png", "data/trans.png")
+    run_alignment_pipeline("data/mire_rebuild.png", "data/mire_trans_rebuild.png")

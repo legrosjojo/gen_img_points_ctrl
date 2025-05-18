@@ -160,3 +160,10 @@ def ameliorer_image(image_path="data/mire_photo.png", sortie_path="data/mire_reb
     path2 = thicken_shapes(path1, thickened_path)
     if path2:
         clean_motifs(path2, final_output_path)
+    
+    for path in [recolored_path, thickened_path]:
+        try:
+            if os.path.exists(path):
+                os.remove(path)
+        except Exception as e:
+            print(f"Erreur lors de la suppression de {path} : {e}")
