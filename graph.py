@@ -9,7 +9,7 @@ import customtkinter
 
 import crop_gui2
 import code2
-#import search
+import search
 import capture
 import rebuild
 
