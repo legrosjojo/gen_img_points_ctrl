@@ -11,6 +11,7 @@ import crop_gui
 import code2
 import search
 import capture
+import rebuild
 
 customtkinter.set_appearance_mode("Dark")
 customtkinter.set_default_color_theme("dark-blue")
