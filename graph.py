@@ -7,7 +7,7 @@ from PIL import Image
 import tkinter as tk
 import customtkinter
 
-import crop_gui
+import crop_gui2
 import code2
 import search
 import capture
@@ -195,16 +195,14 @@ class CustomGUI(customtkinter.CTk):
         #os.makedirs("data", exist_ok=True)
         cv.imwrite("data/mire_trans.png", cv.cvtColor(img, cv.COLOR_RGB2BGR))
         self.destroy()
-        capture.process_capture("data/mire_trans.png", "data/mire_photo.png")
-        crop_gui.bool_second=False
-        crop_gui.secondcrop()
+        capture.process_capture("data/mire_trans.png", "data/mire_trans_photo.png")
+        crop_gui2.secondcrop()
         rebuild.ameliorer_image("data/mire_trans_crop.png", "data/mire_trasn_rebuild.png")
 
         # Exécute la pipeline d'alignement sans popup
         search.run_alignment_pipeline("mire_rebuild.png", "data/mire_trans_rebuild.png")
 
         # Fin de l'application
-        self.destroy()
         sys.exit()
 
     def quit_app(self):
