@@ -239,7 +239,7 @@ class CropApp(ctk.CTk):
         # Mise à jour de l'image redimensionnée
         self.update_image()
 
-def secondcrop(image):
+def secondcrop():
     pts_src = np.array(selected_points, dtype=np.float32)
     pts_dst = np.array([
         [0, 0],
@@ -249,8 +249,8 @@ def secondcrop(image):
     ], dtype=np.float32)
     
     M = cv2.getPerspectiveTransform(pts_src, pts_dst)
-    img_cropped = cv2.warpPerspective(self.img_cv_orig, M, (CROP_WIDTH, CROP_HEIGHT))
-    cv2.imwrite("data/mire_crop.png", cv2.cvtColor(img_cropped, cv2.COLOR_RGB2BGR))
+    img_cropped = cv2.warpPerspective("data/mire_trans.png", M, (CROP_WIDTH, CROP_HEIGHT))
+    cv2.imwrite("data/mire_trans_crop.png", cv2.cvtColor(img_cropped, cv2.COLOR_RGB2BGR))
 
 def main_crop_gui() :
     app = CropApp()
