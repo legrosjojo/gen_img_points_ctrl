@@ -187,14 +187,12 @@ class CropApp(ctk.CTk):
         cv2.imwrite("data/mire_crop.png", cv2.cvtColor(img_cropped, cv2.COLOR_RGB2BGR))
 
          # ✅ Appel au traitement automatique juste après le crop
-        rebuild.ameliorer_image("data/mire_crop.png", "data/mire_rebuild.png")
+        rebuild.ameliorer_image("data/mire_trans_crop.png", "data/mire__trans_rebuild.png")
         
-        self.label.configure(text="Image rognée sauvegardée sous 'mire_crop&rebuilt.png'")
+        self.label.configure(text="Image rognée sauvegardée sous 'mire_trans_crop&rebuilt.png'")
         self.btn_crop.configure(state="disabled")
         self.destroy()
 
-        if bool_second :
-            graph.main_graph()
 
     def draw_polygon_and_mask(self):
         if len(selected_points) != 4:
