@@ -4,12 +4,12 @@ Ce module gère la reconstruction et l'amélioration des images capturées, nota
 
 ##Exemple d'images 
 <figure>
-    <img src="/images/mire_315b.png" alt="Exemple d'image capturée">
+    <img src="../images/mire_315b.png" alt="Exemple d'image capturée">
     <figcaption>Image capturée et recadrée </figcaption>
 </figure>
 
 <figure>
-    <img src="/images/mire_315a_rebuild.png" alt="Exemple d'image capturée">
+    <img src="../images/mire_315a_rebuild.png" alt="Exemple d'image capturée">
     <figcaption>Image précédente traitée</figcaption>
 </figure>
 

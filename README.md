@@ -111,17 +111,12 @@ Pour visualiser la documentation en local :
 pip install mkdocs mkdocs-material
 ```
 
-2. Naviguez dans le dossier `docs/` :
-```bash
-cd docs
-```
-
-3. Lancez le serveur de développement MkDocs :
+2. Depuis la racine du projet, lancez le serveur de développement MkDocs :
 ```bash
 python -m mkdocs serve
 ```
 
-4. Ouvrez votre navigateur à l'adresse : http://127.0.0.1:8000
+3. Ouvrez votre navigateur à l'adresse : http://127.0.0.1:8000
 
 La documentation sera automatiquement mise à jour à chaque modification des fichiers source.
 

@@ -6,13 +6,13 @@ Ce module contient les fonctions principales pour le traitement des images et le
 
 ### Image de Référence
 <figure>
-    <img src="/images/mire_315a.png" alt="Image de référence">
+    <img src="../images/mire_315a.png" alt="Image de référence">
     <figcaption>Image de référence (mire_315a.png)</figcaption>
 </figure>
 
 ### Image Transformée
 <figure>
-    <img src="/images/trans.png" alt="Image transformée">
+    <img src="../images/trans.png" alt="Image transformée">
     <figcaption>Image après transformation (trans.png)</figcaption>
 </figure>
 
@@ -35,7 +35,7 @@ virtual_focal_dist = ncols / (2 * np.tan(np.radians(virtual_focal / 2)))  # Dist
 
 ### Paramètres de transformation
 <figure>
-    <img src="/images/sixaxes.jpg" alt="Représentation des six axes">
+    <img src="../images/sixaxes.jpg" alt="Représentation des six axes">
 </figure>
 ```python
 # Translation

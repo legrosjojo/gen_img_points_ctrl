@@ -5,7 +5,7 @@ Ce module gère la capture d'images depuis une caméra compatible avec le SDK Ba
 ## Interface de capture
 
 <figure>
-    <img src="/images/photo_color.png" alt="Exemple d'image capturée">
+    <img src="../images/photo_color.png" alt="Exemple d'image capturée">
     <figcaption>Exemple d'image capturée</figcaption>
 </figure>
 

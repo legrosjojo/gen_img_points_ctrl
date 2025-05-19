@@ -1,9 +1,10 @@
 site_name: Documentation du Projet
 site_description: Documentation du projet de génération d'images et de points de contrôle
 site_author: Acikoz Yasin & Guillaume Joffrey
+site_url: http://127.0.0.1:8000/
 
 # Configuration du répertoire de documentation
-docs_dir: .
+docs_dir: docs
 
 theme:
   name: material
@@ -16,7 +17,7 @@ theme:
     - search.suggest
   icon:
     repo: fontawesome/brands/github
-  repo_url: https://github.com/legrosjojo/gen_img_points_ctrl
+repo_url: https://github.com/legrosjojo/gen_img_points_ctrl
 
 markdown_extensions:
   - pymdownx.highlight
@@ -44,3 +45,7 @@ nav:
     - Module Principal: api/code.md
     - Module de Test: api/test.md
     - Module de Recherche: api/search.md
+    - Module de Capture: api/capture.md
+    - Module de Reconstruction: api/rebuild.md
+
+use_directory_urls: false 

@@ -19,7 +19,7 @@ M_transform = []     # Matrice de transformation
 
 ### Recherche de voisins
 <figure>
-    <img src="/images/search.png" alt="Schéma recherche voisin">
+    <img src="../images/search.png" alt="Schéma recherche voisin">
     <figcaption>Schéma montrant la recherche de voisins :</figcaption>
     <figcaption>
         - Croix central : centre du motif de référence<br>
@@ -50,7 +50,7 @@ def find_neighbor(center_tab, cx, cy, angle, init_dist=5, step_size=5, max_dist=
 
 ### Traitement d'un motif
 <figure>
-    <img src="/images/codage.png" alt="Système de codage avec exemple">
+    <img src="../images/codage.png" alt="Système de codage avec exemple">
     <figcaption>Système de codage avec exemple</figcaption>
 </figure>
 ```python
@@ -85,7 +85,7 @@ def generate_base_mire(image, start_angle=0):
 
 ### Ajout des codes tournés
 <figure>
-    <img src="/images/rotation_code.png" alt="Schéma de rotation des codes">
+    <img src="../images/rotation_code.png" alt="Schéma de rotation des codes">
     <figcaption>
         Schéma explicatif de la rotation des codes :<br>
         - Code initial : M12345678 (M = type du motif, 1-8 = voisins)<br>
