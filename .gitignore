@@ -175,10 +175,6 @@ cython_debug/
 
 ###.gitignore perso
 #ouput file
-#doc doxygen
-/html
-/latex
-/rtf
 #données générés
 #fichier test
 test.py
