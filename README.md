@@ -20,15 +20,18 @@ Ce projet permet de manipuler, transformer et analyser des images de mires pour 
 .
 ├── code.py         # Traitement principal des images et transformations
 ├── crop_gui.py      # Interface graphique pour le recadrage manuel
+├── crop_gui2.py     # Interface graphique alternative pour le recadrage
 ├── capture.py       # Capture d'image depuis une caméra
 ├── graph.py         # Interface graphique principale (contrôle des transformations)
 ├── rebuild.py       # Correction et recolorisation des images de mire
 ├── search.py        # Détection, codage et alignement des motifs
 ├── test.py          # Exemple de détection de motifs (script de test)
 ├── data/            # Images d'entrée, résultats, fichiers générés
-├── mire_7x7.png     # Exemple de mire
-├── mire_11x11.png   # Exemple de mire
+├── docs/            # Documentation source (fichiers Markdown, images, etc.)
 ├── webographie.txt  # Sources et documentation utiles
+├── doc.html         # Documentation HTML générée
+├── libs.txt         # Liste des bibliothèques utilisées
+├── .gitignore       # Fichiers ignorés par Git
 └── README.md        # Ce document
 ```
 
