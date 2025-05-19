@@ -102,6 +102,29 @@ python test.py
 - Le code est documenté avec des docstrings et des commentaires.
 - Un fichier `webographie.txt` recense les principales sources et inspirations utilisées pour le développement.
 
+### Visualisation de la documentation
+
+Pour visualiser la documentation en local :
+
+1. Installez MkDocs et ses dépendances :
+```bash
+pip install mkdocs mkdocs-material
+```
+
+2. Naviguez dans le dossier `docs/` :
+```bash
+cd docs
+```
+
+3. Lancez le serveur de développement MkDocs :
+```bash
+mkdocs serve
+```
+
+4. Ouvrez votre navigateur à l'adresse : http://127.0.0.1:8000
+
+La documentation sera automatiquement mise à jour à chaque modification des fichiers source.
+
 ## À propos
 
 Projet réalisé dans le cadre du module d'ingénierie FIP, Groupe 3.
