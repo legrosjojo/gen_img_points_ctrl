@@ -3,6 +3,10 @@ import cv2
 import crop_gui
 import numpy as np
 import customtkinter as ctk
+import os
+import time
+from datetime import datetime
+import code
 
 def fullscreen(image):
     img = cv2.imread(image)
@@ -64,6 +68,84 @@ def process_capture(image, filename):
     fullscreen(image)
     capture_color_image(filename)
 
+def capture_image(camera_index=0, save_path=None):
+    """
+    Capture une image depuis la caméra et la sauvegarde si demandé.
+    
+    Args:
+        camera_index (int): Index de la caméra à utiliser
+        save_path (str): Chemin où sauvegarder l'image. Si None, l'image n'est pas sauvegardée.
+        
+    Returns:
+        numpy.ndarray: Image capturée ou None en cas d'erreur
+    """
+    # Initialiser la caméra
+    cap = cv2.VideoCapture(camera_index)
+    if not cap.isOpened():
+        print("Erreur: Impossible d'ouvrir la caméra")
+        return None
+        
+    # Capturer une image
+    ret, frame = cap.read()
+    if not ret:
+        print("Erreur: Impossible de capturer l'image")
+        cap.release()
+        return None
+        
+    # Sauvegarder l'image si un chemin est spécifié
+    if save_path:
+        # Créer le dossier s'il n'existe pas
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        cv2.imwrite(save_path, frame)
+        print(f"Image sauvegardée: {save_path}")
+        
+    # Libérer la caméra
+    cap.release()
+    
+    return frame
+
+def process_captured_image(image):
+    """
+    Traite une image capturée pour détecter les motifs.
+    
+    Args:
+        image (numpy.ndarray): Image à traiter
+        
+    Returns:
+        list: Liste des centres des motifs détectés
+    """
+    if image is None:
+        return []
+        
+    # Initialiser code.center_tab
+    code.center_tab = []
+    
+    # Traiter l'image
+    code.fullContoursProcess(image)
+    
+    return code.center_tab.copy()
+
+def main():
+    # Créer le dossier data s'il n'existe pas
+    os.makedirs("data", exist_ok=True)
+    
+    # Capturer une image
+    image = capture_image(save_path="data/capture.png")
+    if image is None:
+        return
+        
+    # Traiter l'image
+    centers = process_captured_image(image)
+    print(f"Nombre de motifs détectés: {len(centers)}")
+    
+    # Afficher l'image avec les centres
+    img_centers = image.copy()
+    for center in centers:
+        cv2.circle(img_centers, (int(center[0]), int(center[1])), 5, (0, 0, 255), -1)
+        
+    cv2.imshow("Image capturée avec centres", img_centers)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
 if __name__ == "__main__":
-    process_capture("data/mire_315a.png", "data/mire_photo.png")
-    crop_gui.main_crop_gui()
+    main()

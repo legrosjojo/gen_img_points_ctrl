@@ -18,7 +18,7 @@ Ce projet permet de manipuler, transformer et analyser des images de mires pour 
 
 ```
 .
-├── code2.py         # Traitement principal des images et transformations
+├── code.py         # Traitement principal des images et transformations
 ├── crop_gui.py      # Interface graphique pour le recadrage manuel
 ├── capture.py       # Capture d'image depuis une caméra
 ├── graph.py         # Interface graphique principale (contrôle des transformations)

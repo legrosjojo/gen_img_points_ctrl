@@ -263,6 +263,51 @@ def main_crop_gui() :
     app = CropApp()
     app.mainloop()
 
+def run_crop_pipeline(image_path, output_path=None):
+    """
+    Exécute le pipeline complet de recadrage d'image.
+    
+    Args:
+        image_path (str): Chemin vers l'image à recadrer
+        output_path (str, optional): Chemin où sauvegarder l'image recadrée
+        
+    Returns:
+        numpy.ndarray: Image recadrée ou None en cas d'erreur
+    """
+    # Charger l'image
+    img = cv2.imread(image_path)
+    if img is None:
+        print(f"Erreur: Impossible de charger l'image depuis {image_path}")
+        return None
+        
+    # Recadrer l'image
+    img_cropped = crop_image(img)
+    
+    # Sauvegarder l'image si un chemin est spécifié
+    if output_path:
+        cv2.imwrite(output_path, img_cropped)
+        print(f"Image recadrée sauvegardée: {output_path}")
+        
+    return img_cropped
+
+def main():
+    # Chemin vers l'image à recadrer
+    image_path = "data/trans.png"
+    
+    # Chemin où sauvegarder l'image recadrée
+    output_path = "data/cropped.png"
+    
+    # Exécuter le pipeline de recadrage
+    img_cropped = run_crop_pipeline(image_path, output_path)
+    
+    if img_cropped is not None:
+        # Afficher l'image originale et l'image recadrée côte à côte
+        img_original = cv2.imread(image_path)
+        img_combined = np.hstack((img_original, img_cropped))
+        
+        cv2.imshow("Original vs Recadré", img_combined)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
 if __name__ == "__main__":
-    app = CropApp()
-    app.mainloop()
+    main()

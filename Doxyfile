@@ -1,8 +1,0 @@
-PROJECT_NAME   = ProjetIng
-OUTPUT_DIRECTORY = docs
-INPUT            = .
-FILE_PATTERNS    = *.py
-RECURSIVE        = YES
-GENERATE_PYI     = YES
-DOXYPY_EXECUTABLE = doxypypy  # Assurez-vous que doxypypy est dans votre PATH ou indiquez le chemin complet
-GENERATE_HTML    = YES

@@ -1,6 +1,6 @@
 import sys
 import os
-import cv2 as cv
+import cv2
 import numpy as np
 from PIL import Image
 
@@ -8,7 +8,7 @@ import tkinter as tk
 import customtkinter
 
 import crop_gui2
-import code2
+import code
 import search
 import capture
 import rebuild
@@ -103,7 +103,7 @@ class CustomGUI(customtkinter.CTk):
         self.show_data_frame.pack(pady=10, fill="x")
         customtkinter.CTkLabel(self.show_data_frame, text="Show Data").pack(anchor="w")
         for i, label in enumerate(["Original Image", "Transformed Image", "Mask", "HSV", "Grey", "Threshold", "Contours", "Contours Min Rouge"]):
-            var = tk.BooleanVar(value=code2.show_data[i])
+            var = tk.BooleanVar(value=code.show_data[i])
             cb = customtkinter.CTkCheckBox(self.show_data_frame, text=label, variable=var)
             cb.pack(anchor="w")
             self.show_data_vars.append(var)
@@ -113,7 +113,7 @@ class CustomGUI(customtkinter.CTk):
         self.save_data_frame.pack(pady=10, fill="x")
         customtkinter.CTkLabel(self.save_data_frame, text="Save Data").pack(anchor="w")
         for i, label in enumerate(["Parameters", "Original Image", "Transformed Image", "Mask", "HSV", "Grey", "Threshold", "Contours", "Contours Min Rouge"]):
-            var = tk.BooleanVar(value=code2.save_data[i])
+            var = tk.BooleanVar(value=code.save_data[i])
             cb = customtkinter.CTkCheckBox(self.save_data_frame, text=label, variable=var)
             cb.pack(anchor="w")
             self.save_data_vars.append(var)
@@ -140,16 +140,16 @@ class CustomGUI(customtkinter.CTk):
             ]
             r = [self.sliders[f"Rotation {a}"].get() for a in "XYZ"]
             transformed = self.apply_transformations(self.original_image, *t, *r)
-            self.pil_image = Image.fromarray(cv.cvtColor(transformed, cv.COLOR_RGB2RGBA))
+            self.pil_image = Image.fromarray(cv2.cvtColor(transformed, cv2.COLOR_RGB2RGBA))
             self.photo = customtkinter.CTkImage(self.pil_image, size=(self.pil_image.width, self.pil_image.height))
             self.image_label.configure(image=self.photo, text="")
             self.image_label.image = self.photo
 
     def apply_transformations(self, image, t_x, t_y, t_z, r_x, r_y, r_z):
         nrows, ncols = image.shape[:2]
-        t = code2.tz_rxy() @ code2.translationXYZ(t_x, t_y, t_z) @ code2.rotationXYZBis(r_x, r_y, r_z)
-        H = code2._3Dto2D() @ t @ code2._2Dto3D()
-        return cv.warpPerspective(image, H, (ncols, nrows), None, borderValue=(255, 255, 255))
+        t = code.tz_rxy() @ code.translationXYZ(t_x, t_y, t_z) @ code.rotationXYZBis(r_x, r_y, r_z)
+        H = code._3Dto2D() @ t @ code._2Dto3D()
+        return cv2.warpPerspective(image, H, (ncols, nrows), None, borderValue=(255, 255, 255))
 
     def disable_controls(self):
         for slider in self.sliders.values():
@@ -159,7 +159,7 @@ class CustomGUI(customtkinter.CTk):
         self.validate_button.configure(state="disabled")
 
     def enable_controls(self):
-        img = cv.imread("data/mire_rebuild.png")
+        img = cv2.imread("data/mire_rebuild.png")
         search.base_mire_raw = search.generate_base_mire(img, start_angle=0)
         search.base_mire = search.add_rotated_codes(search.base_mire_raw)
         if img is None:
@@ -169,7 +169,7 @@ class CustomGUI(customtkinter.CTk):
         for slider in self.sliders.values():
             slider.configure(state="normal")
         self.validate_button.configure(state="normal")
-        self.original_image = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+        self.original_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         self.update_image()
 
     def load_base_image_and_enable_controls(self):
@@ -188,15 +188,15 @@ class CustomGUI(customtkinter.CTk):
             self.sliders["Translation Z (Zoom)"].get(),
         ]
         r = [self.sliders[f"Rotation {a}"].get() for a in "XYZ"]
-        code2.t_x, code2.t_y, code2.t_z = t
-        code2.r_x, code2.r_y, code2.r_z = r
-        code2.show_data = [v.get() for v in self.show_data_vars]
-        code2.save_data = [v.get() for v in self.save_data_vars]
+        code.t_x, code.t_y, code.t_z = t
+        code.r_x, code.r_y, code.r_z = r
+        code.show_data = [v.get() for v in self.show_data_vars]
+        code.save_data = [v.get() for v in self.save_data_vars]
 
         # Applique la transformation et sauvegarde l'image transformée
         img = self.apply_transformations(self.original_image, *t, *r)
         #os.makedirs("data", exist_ok=True)
-        cv.imwrite("data/mire_trans.png", cv.cvtColor(img, cv.COLOR_RGB2BGR))
+        cv2.imwrite("data/mire_trans.png", cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
         self.destroy()
         capture.process_capture("data/mire_trans.png", "data/mire_trans_photo.png")
         crop_gui2.main_crop_gui()

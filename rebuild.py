@@ -2,6 +2,9 @@ from PIL import Image
 import numpy as np
 from scipy.ndimage import label
 import os
+import cv2
+import math
+import code
 
 # --- Définition des couleurs fixes ---
 COLOR_WHITE = (255, 255, 255)
@@ -167,3 +170,58 @@ def ameliorer_image(image_path="data/mire_photo.png", sortie_path="data/mire_reb
                 os.remove(path)
         except Exception as e:
             print(f"Erreur lors de la suppression de {path} : {e}")
+
+def run_reconstruction_pipeline(image_path, output_path=None):
+    """
+    Exécute le pipeline complet de reconstruction d'image.
+    
+    Args:
+        image_path (str): Chemin vers l'image à reconstruire
+        output_path (str, optional): Chemin où sauvegarder l'image reconstruite
+        
+    Returns:
+        numpy.ndarray: Image reconstruite ou None en cas d'erreur
+    """
+    # Charger l'image
+    img = cv2.imread(image_path)
+    if img is None:
+        print(f"Erreur: Impossible de charger l'image depuis {image_path}")
+        return None
+        
+    # Corriger les pixels errants
+    img_corrected = corriger_pixels_errants(img)
+    
+    # Déterminer la couleur prédominante
+    couleur = couleur_predominante_kmeans(img_corrected)
+    
+    # Améliorer l'image
+    img_amelioree = ameliorer_image(img_corrected, couleur)
+    
+    # Sauvegarder l'image si un chemin est spécifié
+    if output_path:
+        cv2.imwrite(output_path, img_amelioree)
+        print(f"Image reconstruite sauvegardée: {output_path}")
+        
+    return img_amelioree
+
+def main():
+    # Chemin vers l'image à reconstruire
+    image_path = "data/trans.png"
+    
+    # Chemin où sauvegarder l'image reconstruite
+    output_path = "data/reconstructed.png"
+    
+    # Exécuter le pipeline de reconstruction
+    img_reconstructed = run_reconstruction_pipeline(image_path, output_path)
+    
+    if img_reconstructed is not None:
+        # Afficher l'image originale et l'image reconstruite côte à côte
+        img_original = cv2.imread(image_path)
+        img_combined = np.hstack((img_original, img_reconstructed))
+        
+        cv2.imshow("Original vs Reconstruit", img_combined)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    main()
