@@ -26,7 +26,7 @@ dominant_colors = [
 class CustomGUI(customtkinter.CTk):
     def __init__(self):
         super().__init__()
-        self.title("Projet FIP Ingénieur Groupe 3")
+        self.title("Projet FIP Ingenieur Groupe 3")
         self.attributes("-fullscreen", True)
         #self.geometry("1200x560")  # optionnelle
         self.bind("<Escape>", lambda e: self.attributes("-fullscreen", False))

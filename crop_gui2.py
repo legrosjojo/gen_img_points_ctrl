@@ -33,9 +33,9 @@ class CropApp(ctk.CTk):
         else : 
             raise RuntimeError("Erreur data/mire_trans_photo.png introuvable")
 
-        self.title("Sélection 4 points pour crop")
+        self.title("Selection 4 points pour crop")
         self.attributes("-fullscreen", True)
-        self.geometry("800x600")  # optionnelle
+        #self.geometry("800x600")  # optionnelle
         self.bind("<Escape>", lambda e: self.attributes("-fullscreen", False))
         
         # Chargement image
