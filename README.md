@@ -118,7 +118,7 @@ cd docs
 
 3. Lancez le serveur de développement MkDocs :
 ```bash
-mkdocs serve
+python -m mkdocs serve
 ```
 
 4. Ouvrez votre navigateur à l'adresse : http://127.0.0.1:8000
