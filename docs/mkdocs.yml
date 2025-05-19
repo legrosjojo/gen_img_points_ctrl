@@ -1,6 +1,9 @@
-site_name: Documentation Projet FIP
-site_description: Documentation du projet FIP Ingénieur Groupe 3
-site_author: Groupe 3
+site_name: Documentation du Projet
+site_description: Documentation du projet de génération d'images et de points de contrôle
+site_author: Acikoz Yasin & Guillaume Joffrey
+
+# Configuration du répertoire de documentation
+docs_dir: .
 
 theme:
   name: material
@@ -8,60 +11,34 @@ theme:
     - navigation.tabs
     - navigation.sections
     - navigation.expand
-    - navigation.top
     - search.highlight
     - search.share
     - search.suggest
-  palette:
-    - scheme: default
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-    - scheme: slate
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
-
-nav:
-  - Accueil: index.md
-  - Installation: installation/index.md
-  - Utilisation:
-    - Interface Graphique: usage/gui/index.md
-    - Capture d'Images: usage/capture/index.md
-    - Traitement: usage/processing/index.md
-  - API:
-    - Module Principal: api/code.md
-    - Module de Capture: api/capture.md
-    - Module de Reconstruction: api/rebuild.md
-    - Module de Recherche: api/search.md
-    - Module de Test: api/test.md
 
 markdown_extensions:
   - pymdownx.highlight
   - pymdownx.superfences
   - pymdownx.inlinehilite
   - pymdownx.tabbed
+  - pymdownx.arithmatex
   - pymdownx.emoji
   - admonition
   - footnotes
   - toc:
       permalink: true
 
-# Configuration pour GitHub Pages
 plugins:
   - search
-  - git-revision-date-localized:
-      type: date
-      fallback_to_build_date: true
+  - git-revision-date-localized
 
-# Configuration pour le déploiement
-repo_url: https://github.com/yourusername/your-repo
-repo_name: your-repo
-edit_uri: edit/main/docs/docs/
-
-# Configuration pour GitHub Pages
-site_dir: site
+nav:
+  - Accueil: index.md
+  - Installation: installation.md
+  - Guide d'utilisation:
+    - Interface graphique: usage/gui.md
+    - Capture d'images: usage/capture.md
+    - Traitement d'images: usage/processing.md
+  - API:
+    - Module Principal: api/code.md
+    - Module de Test: api/test.md
+    - Module de Recherche: api/search.md
