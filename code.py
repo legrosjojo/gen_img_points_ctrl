@@ -782,7 +782,7 @@ def encodeur(img):
 #                                            MAIN                                                #
 ##################################################################################################
 
-def main_code2():
+def main_code():
 
     if show_data[0]:
         cv.imshow("Mire originale", mire_orig)
