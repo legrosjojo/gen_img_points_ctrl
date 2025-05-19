@@ -184,8 +184,8 @@ def run_alignment_pipeline(image_original_path, image_transformed_path):
 
         # Display results
         cv.imshow("Original", img_original)
-        cv.imshow("Transformée", img_transformed)
-        cv.imshow("Alignée", img_aligned)
+        cv.imshow("Transformee", img_transformed)
+        cv.imshow("Alignee", img_aligned)
         cv.waitKey(0)
         cv.destroyAllWindows()
 

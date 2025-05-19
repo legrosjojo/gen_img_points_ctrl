@@ -33,8 +33,10 @@ class CropApp(ctk.CTk):
             raise RuntimeError("Erreur data/mire_photo.png introuvable")
 
         self.title("Sélection 4 points pour crop")
-        self.geometry("800x600")  # taille initiale fenêtre
-        
+        self.attributes("-fullscreen", True)
+        self.geometry("800x600")  # optionnelle
+        self.bind("<Escape>", lambda e: self.attributes("-fullscreen", False))
+
         # Chargement image
         self.img_cv_orig = cv2.imread(IMAGE_PATH)
         self.img_cv_orig = cv2.cvtColor(self.img_cv_orig, cv2.COLOR_BGR2RGB)

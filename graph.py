@@ -27,7 +27,10 @@ class CustomGUI(customtkinter.CTk):
     def __init__(self):
         super().__init__()
         self.title("Projet FIP Ingénieur Groupe 3")
-        self.geometry("1200x560")
+        self.attributes("-fullscreen", True)
+        self.geometry("1200x560")  # optionnelle
+        self.bind("<Escape>", lambda e: self.attributes("-fullscreen", False))
+        
 
         # === FRAME PRINCIPAL ===
         self.left_frame = customtkinter.CTkFrame(self, width=350)
@@ -156,11 +159,11 @@ class CustomGUI(customtkinter.CTk):
         self.validate_button.configure(state="disabled")
 
     def enable_controls(self):
-        img = cv.imread("data/mire_315a.png")
+        img = cv.imread("data/mire_rebuild.png")
         search.base_mire_raw = search.generate_base_mire(img, start_angle=0)
         search.base_mire = search.add_rotated_codes(search.base_mire_raw)
         if img is None:
-            raise ValueError("Erreur de chargement de l'image mire_315a.png")
+            raise ValueError("Erreur de chargement de l'image mire_rebuild.png")
 
 
         for slider in self.sliders.values():
