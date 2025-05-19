@@ -28,7 +28,7 @@ class CustomGUI(customtkinter.CTk):
         super().__init__()
         self.title("Projet FIP Ingénieur Groupe 3")
         self.attributes("-fullscreen", True)
-        self.geometry("1200x560")  # optionnelle
+        #self.geometry("1200x560")  # optionnelle
         self.bind("<Escape>", lambda e: self.attributes("-fullscreen", False))
         
 
