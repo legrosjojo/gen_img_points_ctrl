@@ -30,7 +30,7 @@ def find_neighbor(center_tab, cx, cy, angle, init_dist=5, step_size=5, max_dist=
     return "N"
 
 
-# === Génération du code d’un motif donné ===
+# === Génération du code d'un motif donné ===
 def process_motif(center_tab, index, start_angle):
     motif_x, motif_y, motif_type = center_tab[index]
     neighbors = []
@@ -70,7 +70,7 @@ def add_rotated_codes(base_mire):
     return updated
 
 
-# === Calcul de la matrice d’homographie entre motifs transformés et base mire ===
+# === Calcul de la matrice d'homographie entre motifs transformés et base mire ===
 def compute_homography_matrix(base_mire, motifs_data, min_matches=4):
     lookup_dicts = {
         "0": {code: coord for coord, code, _, _, _ in base_mire},

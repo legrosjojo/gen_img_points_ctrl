@@ -1,0 +1,50 @@
+site_name: Documentation du Projet FIP
+site_description: Documentation du projet de traitement d'images de mires
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.highlight
+    - search.share
+    - search.suggest
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+nav:
+  - Accueil: index.md
+  - Installation: installation.md
+  - Guide d'utilisation:
+    - Interface graphique: usage/gui.md
+  - Documentation technique:
+    - Module principal: api/code2.md
+    - Capture d'images: api/capture.md
+    - Reconstruction: api/rebuild.md
+    - Recherche: api/search.md
+    - Tests: api/test.md
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed
+  - pymdownx.emoji
+  - pymdownx.arithmatex
+  - admonition
+  - footnotes
+  - meta
+  - toc:
+      permalink: true
