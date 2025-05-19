@@ -1,5 +1,7 @@
 site_name: Documentation du Projet FIP
 site_description: Documentation du projet de traitement d'images de mires
+site_author: Yasin
+
 theme:
   name: material
   features:
@@ -26,11 +28,11 @@ theme:
 nav:
   - Accueil: index.md
   - Installation: installation.md
-  - Guide d'utilisation:
-    - Interface graphique: usage/gui.md
-  - Documentation technique:
-    - Module principal: api/code2.md
-    - Capture d'images: api/capture.md
+  - Utilisation:
+    - Interface Graphique: usage/gui.md
+  - API:
+    - Module Principal: api/code2.md
+    - Capture d'Images: api/capture.md
     - Reconstruction: api/rebuild.md
     - Recherche: api/search.md
     - Tests: api/test.md
@@ -48,3 +50,18 @@ markdown_extensions:
   - meta
   - toc:
       permalink: true
+
+# Configuration pour GitHub Pages
+plugins:
+  - search
+  - git-revision-date-localized:
+      type: date
+      fallback_to_build_date: true
+
+# Configuration pour le déploiement
+repo_url: https://github.com/legrosjojo/gen_img_points_ctrl
+repo_name: gen_img_points_ctrl
+edit_uri: edit/main/docs/docs/
+
+# Configuration pour GitHub Pages
+site_dir: site
