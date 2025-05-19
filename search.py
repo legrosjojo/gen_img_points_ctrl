@@ -184,8 +184,11 @@ def run_alignment_pipeline(image_original_path, image_transformed_path):
 
         # Display results
         cv.imshow("Original", img_original)
-        cv.imshow("Transformée", img_transformed)
-        cv.imshow("Alignée", img_aligned)
+        cv.imwrite("data/Original.png", img_original)
+        cv.imshow("Transformee", img_transformed)
+        cv.imwrite("data/Transformee.png", img_transformed)
+        cv.imshow("Alignee", img_aligned)
+        cv.imwrite("data/Alignee.png", img_aligned)
         cv.waitKey(0)
         cv.destroyAllWindows()
 
@@ -214,4 +217,4 @@ def run_alignment_pipeline(image_original_path, image_transformed_path):
 
 # === Exécution si lancé directement ===
 if __name__ == "__main__":
-    run_alignment_pipeline("mire_315a.png", "data/trans.png")
+    run_alignment_pipeline("data/mire_rebuild.png", "data/mire_trans_rebuild.png")

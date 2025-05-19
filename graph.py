@@ -7,10 +7,11 @@ from PIL import Image
 import tkinter as tk
 import customtkinter
 
-import crop_gui
+import crop_gui2
 import code2
 import search
 import capture
+import rebuild
 
 customtkinter.set_appearance_mode("Dark")
 customtkinter.set_default_color_theme("dark-blue")
@@ -25,8 +26,11 @@ dominant_colors = [
 class CustomGUI(customtkinter.CTk):
     def __init__(self):
         super().__init__()
-        self.title("Projet FIP Ingénieur Groupe 3")
-        self.geometry("1200x560")
+        self.title("Projet FIP Ingenieur Groupe 3")
+        self.attributes("-fullscreen", True)
+        #self.geometry("1200x560")  # optionnelle
+        self.bind("<Escape>", lambda e: self.attributes("-fullscreen", False))
+        
 
         # === FRAME PRINCIPAL ===
         self.left_frame = customtkinter.CTkFrame(self, width=350)
@@ -155,11 +159,11 @@ class CustomGUI(customtkinter.CTk):
         self.validate_button.configure(state="disabled")
 
     def enable_controls(self):
-        img = cv.imread("data/mire_315a.png")
+        img = cv.imread("data/mire_rebuild.png")
         search.base_mire_raw = search.generate_base_mire(img, start_angle=0)
         search.base_mire = search.add_rotated_codes(search.base_mire_raw)
         if img is None:
-            raise ValueError("Erreur de chargement de l'image mire_315a.png")
+            raise ValueError("Erreur de chargement de l'image mire_rebuild.png")
 
 
         for slider in self.sliders.values():
@@ -193,16 +197,12 @@ class CustomGUI(customtkinter.CTk):
         img = self.apply_transformations(self.original_image, *t, *r)
         #os.makedirs("data", exist_ok=True)
         cv.imwrite("data/mire_trans.png", cv.cvtColor(img, cv.COLOR_RGB2BGR))
-
+        self.destroy()
         capture.process_capture("data/mire_trans.png", "data/mire_trans_photo.png")
-        crop_gui.secondcrop()
-        rebuild.ameliorer_image("data/mire_trans_crop.png", "data/mire_trasn_rebuild.png")
-
-        # Exécute la pipeline d'alignement sans popup
-        search.run_alignment_pipeline("mire_rebuild.png", "data/mire_trans_rebuild.png")
+        crop_gui2.main_crop_gui()
+        #rebuild.ameliorer_image("data/mire_trans_crop.png", "data/mire_trasn_rebuild.png")
 
         # Fin de l'application
-        self.destroy()
         sys.exit()
 
     def quit_app(self):

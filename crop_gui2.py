@@ -8,6 +8,7 @@ import os
 import rebuild
 import graph
 import subprocess
+import search
 
 
 
@@ -27,16 +28,16 @@ IMAGE_PATH = ""
 class CropApp(ctk.CTk):
     def __init__(self):
         super().__init__()
-        if os.path.exists("data/mire_photo.png"):
-            IMAGE_PATH = "data/mire_photo.png"
+        if os.path.exists("data/mire_trans_photo.png"):
+            IMAGE_PATH = "data/mire_trans_photo.png"
         else : 
-            raise RuntimeError("Erreur data/mire_photo.png introuvable")
+            raise RuntimeError("Erreur data/mire_trans_photo.png introuvable")
 
         self.title("Selection 4 points pour crop")
         self.attributes("-fullscreen", True)
         #self.geometry("800x600")  # optionnelle
         self.bind("<Escape>", lambda e: self.attributes("-fullscreen", False))
-
+        
         # Chargement image
         self.img_cv_orig = cv2.imread(IMAGE_PATH)
         self.img_cv_orig = cv2.cvtColor(self.img_cv_orig, cv2.COLOR_BGR2RGB)
@@ -186,17 +187,17 @@ class CropApp(ctk.CTk):
         
         M = cv2.getPerspectiveTransform(pts_src, pts_dst)
         img_cropped = cv2.warpPerspective(self.img_cv_orig, M, (CROP_WIDTH, CROP_HEIGHT))
-        cv2.imwrite("data/mire_crop.png", cv2.cvtColor(img_cropped, cv2.COLOR_RGB2BGR))
+        cv2.imwrite("data/mire_trans_crop.png", cv2.cvtColor(img_cropped, cv2.COLOR_RGB2BGR))
 
          # ✅ Appel au traitement automatique juste après le crop
-        rebuild.ameliorer_image("data/mire_crop.png", "data/mire_rebuild.png")
-        
-        self.label.configure(text="Image rognée sauvegardée sous 'mire_crop&rebuilt.png'")
+        rebuild.ameliorer_image("data/mire_trans_crop.png", "data/mire_trans_rebuild.png")
+        # Exécute la pipeline d'alignement sans popup
+        self.label.configure(text="Image rognée sauvegardée sous 'mire_trans_crop&rebuilt.png'")
         self.btn_crop.configure(state="disabled")
         self.destroy()
+        search.run_alignment_pipeline("data/mire_rebuild.png", "data/mire_trans_rebuild.png")
+        
 
-        if bool_second :
-            graph.main_graph()
 
     def draw_polygon_and_mask(self):
         if len(selected_points) != 4:

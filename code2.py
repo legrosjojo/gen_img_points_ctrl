@@ -103,7 +103,12 @@ limit_extrm_angle = 5.0
 
 ## @var mask
 #  List of color masks.
-mask = [([38, 179, 38], [38, 179, 38]), ([0, 0, 255], [201, 201, 255]), ([0, 0, 0], [170, 170, 170])]
+# mask = [([38, 179, 38], [38, 179, 38]), ([0, 0, 255], [201, 201, 255]), ([0, 0, 0], [170, 170, 170])]
+mask = [
+    ([0, 245, 0], [10, 255, 10]),       # Vert pur (0, 255, 0) en BGR avec marge
+    ([0, 0, 245], [10, 10, 255]),       # Rouge pur (0, 0, 255) avec marge
+    ([0, 0, 0], [50, 50, 50])           # Noir avec tolérance (0, 0, 0)
+]
 
 ## @var threshold
 #  Threshold values for each mask.
