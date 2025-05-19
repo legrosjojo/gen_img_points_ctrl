@@ -1,6 +1,6 @@
-site_name: Documentation du Projet FIP
-site_description: Documentation du projet de traitement d'images de mires
-site_author: Yasin
+site_name: Documentation Projet FIP
+site_description: Documentation du projet FIP Ingénieur Groupe 3
+site_author: Groupe 3
 
 theme:
   name: material
@@ -8,6 +8,7 @@ theme:
     - navigation.tabs
     - navigation.sections
     - navigation.expand
+    - navigation.top
     - search.highlight
     - search.share
     - search.suggest
@@ -27,27 +28,26 @@ theme:
 
 nav:
   - Accueil: index.md
-  - Installation: installation.md
+  - Installation: installation/index.md
   - Utilisation:
-    - Interface Graphique: usage/gui.md
+    - Interface Graphique: usage/gui/index.md
+    - Capture d'Images: usage/capture/index.md
+    - Traitement: usage/processing/index.md
   - API:
-    - Module Principal: api/code2.md
-    - Capture d'Images: api/capture.md
-    - Reconstruction: api/rebuild.md
-    - Recherche: api/search.md
-    - Tests: api/test.md
+    - Module Principal: api/code.md
+    - Module de Capture: api/capture.md
+    - Module de Reconstruction: api/rebuild.md
+    - Module de Recherche: api/search.md
+    - Module de Test: api/test.md
 
 markdown_extensions:
   - pymdownx.highlight
   - pymdownx.superfences
   - pymdownx.inlinehilite
-  - pymdownx.snippets
   - pymdownx.tabbed
   - pymdownx.emoji
-  - pymdownx.arithmatex
   - admonition
   - footnotes
-  - meta
   - toc:
       permalink: true
 
@@ -59,8 +59,8 @@ plugins:
       fallback_to_build_date: true
 
 # Configuration pour le déploiement
-repo_url: https://github.com/legrosjojo/gen_img_points_ctrl
-repo_name: gen_img_points_ctrl
+repo_url: https://github.com/yourusername/your-repo
+repo_name: your-repo
 edit_uri: edit/main/docs/docs/
 
 # Configuration pour GitHub Pages

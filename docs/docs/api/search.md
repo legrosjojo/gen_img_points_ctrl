@@ -1,15 +1,12 @@
-# Module de Recherche (search.py)
+# Module de Recherche
 
 Ce module gère la recherche et l'alignement des motifs dans les images de mires.
 
 ## Variables Globales
 
-### Paramètres de recherche
-```python
-distance_init = 5    # Distance initiale de recherche
-step_size = 5        # Pas de recherche
-max_distance = 100   # Distance maximale de recherche
-```
+- `distance_init` : Distance initiale pour la recherche de voisins
+- `step_size` : Pas de progression pour la recherche
+- `max_distance` : Distance maximale de recherche
 
 ### Variables exportables
 ```python
@@ -152,4 +149,4 @@ def run_alignment_pipeline(image_original_path, image_transformed_path):
 - Les motifs sont codés selon leur type et leurs voisins
 - L'alignement prend en compte les rotations de 90°, 180° et 270°
 - Les résultats sont sauvegardés dans `data/result.txt`
-- Le module utilise les fonctions de détection de `code2.py` 
+- Le module utilise les fonctions de détection de `code.py` 

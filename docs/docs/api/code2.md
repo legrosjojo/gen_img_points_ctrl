@@ -1,6 +1,6 @@
-# Module Principal (code2.py)
+# Module Principal (code.py)
 
-Ce module contient les fonctions principales pour le traitement et la transformation des images de mires.
+Ce module contient les fonctions principales pour le traitement des images et les transformations.
 
 ## Exemples d'Images
 

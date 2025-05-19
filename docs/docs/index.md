@@ -15,7 +15,7 @@ Bienvenue dans la documentation du projet de traitement d'images de mires. Ce pr
 
 ```
 .
-├── code2.py         # Traitement principal des images et transformations
+├── code.py         # Traitement principal des images et transformations
 ├── crop_gui.py      # Interface graphique pour le recadrage manuel
 ├── capture.py       # Capture d'image depuis une caméra
 ├── graph.py         # Interface graphique principale
@@ -28,7 +28,7 @@ Bienvenue dans la documentation du projet de traitement d'images de mires. Ce pr
 
 1. [Installation](installation.md)
 2. [Guide d'utilisation](usage/gui.md)
-3. [Documentation technique](api/code2.md)
+3. [Documentation technique](api/code.md)
 
 ## À propos
 
