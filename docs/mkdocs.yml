@@ -36,10 +36,7 @@ plugins:
 nav:
   - Accueil: index.md
   - Installation: installation.md
-  - Guide d'utilisation:
-    - Interface graphique: usage/gui.md
-    - Capture d'images: usage/capture.md
-    - Traitement d'images: usage/processing.md
+  - Guide d'utilisation: usage.md
   - API:
     - Module Principal: api/code.md
     - Module de Test: api/test.md

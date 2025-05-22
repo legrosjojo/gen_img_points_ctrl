@@ -1,66 +1,87 @@
 # Installation
 
-Ce guide vous aidera à installer et configurer le projet sur votre système.
+Ce guide vous permettra d'installer et de configurer correctement le projet sur votre système.
 
 ## Prérequis
 
-- Python 3.8 ou supérieur
-- Une caméra compatible (optionnel, pour la capture)
-- Git (pour cloner le dépôt)
+- Python 3.x
+- Git
+- Une caméra Basler compatible
+- Pylon Viewer (pour la configuration de la caméra)
 
-## Installation des dépendances
+## Installation du projet
 
-1. Clonez le dépôt :
-```bash
-git clone [URL_DU_REPO]
-cd [NOM_DU_DOSSIER]
-```
+### 1. Récupération du projet
 
-2. Installez les dépendances Python :
-```bash
-pip install -r requirements.txt
-```
-
-Les dépendances principales sont :
-- `opencv-python` : pour le traitement d'images
-- `numpy` : pour les calculs matriciels
-- `Pillow` : pour la manipulation d'images
-- `customtkinter` : pour l'interface graphique
-- `pypylon` : pour la capture via caméra Basler (optionnel)
-
-## Configuration
-
-1. Créez un dossier `data` à la racine du projet :
-```bash
-mkdir data
-```
-
-2. Placez vos images de mires dans le dossier `data/` :
-- `mire_315a.png` : image de référence
-- Autres images de mires selon vos besoins
-
-## Vérification de l'installation
-
-Pour vérifier que tout est correctement installé, lancez l'interface principale :
+Clonez le dépôt Git contenant le projet :
 
 ```bash
-python graph.py
+git clone https://github.com/legrosjojo/gen_img_points_ctrl.git
 ```
 
-Si l'interface s'ouvre correctement, l'installation est réussie.
+Vous pouvez également récupérer le répertoire `gen_img_points_ctrl` par une autre méthode (téléchargement ZIP, transfert USB, etc.).
 
-## Dépannage
+### 2. Configuration de l'environnement
 
-### Problèmes courants
+#### Se positionner dans le dossier du projet
 
-1. **Erreur d'importation de modules**
-   - Vérifiez que toutes les dépendances sont installées
-   - Utilisez `pip list` pour voir les packages installés
+```bash
+cd gen_img_points_ctrl
+```
 
-2. **Erreur de capture caméra**
-   - Vérifiez que la caméra est correctement connectée
-   - Installez les pilotes appropriés pour votre caméra
+#### Créer un environnement virtuel Python
 
-3. **Erreur d'affichage de l'interface**
-   - Vérifiez que vous avez les droits d'accès au dossier `data/`
-   - Assurez-vous que les images de référence sont présentes 
+```bash
+python -m venv venv
+```
+
+#### Activer l'environnement virtuel
+
+Sous Linux / macOS :
+```bash
+source venv/bin/activate
+```
+
+Sous Windows (cmd) :
+```bash
+venv\Scripts\activate
+```
+
+#### Installer les dépendances
+
+```bash
+pip install -r libs.txt
+```
+
+## Installation de Pylon Viewer
+
+### 1. Téléchargement
+
+1. Rendez-vous sur le site officiel de Basler : [https://www.baslerweb.com/fr-fr/downloads/software/](https://www.baslerweb.com/fr-fr/downloads/software/)
+2. Choisissez la version Linux ARM 64bits
+
+### 2. Installation sur Raspberry Pi
+
+1. Extraire l'archive :
+```bash
+tar -xzf pylon-*.tar.gz
+cd pylon-*/debs-aarch64
+```
+
+2. Installer les paquets :
+```bash
+sudo dpkg -i *.deb
+```
+
+3. Si des dépendances manquent, les installer :
+```bash
+sudo apt-get install -f
+```
+
+### 3. Vérification
+
+Une fois l'installation terminée, vous pouvez lancer Pylon Viewer depuis le menu démarrage du Raspberry PI > Sons & vidéo > pylon Viewer
+
+## Prochaines étapes
+
+Une fois l'installation terminée, vous pouvez passer à la section [Utilisation](../usage/) pour apprendre à utiliser le projet. 
